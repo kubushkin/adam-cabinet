@@ -5,6 +5,7 @@
 id_token (нужен Keycloak при выходе) и ответы Гауди (профиль, оценки) на PROFILE_SECONDS — Гауди отвечает около секунды,
 и без этого чувствовалась задержка при каждом переключении вкладок.
 """
+import copy
 import time
 from functools import wraps
 from urllib.parse import urlencode
@@ -14,6 +15,7 @@ from django.http import Http404
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.dateparse import parse_datetime
 from django.utils.dates import WEEKDAYS
 from django.utils.translation import get_language, gettext as _
 from django.views.decorators.http import require_POST
@@ -24,7 +26,15 @@ PROFILE_SECONDS = 300  # профиль меняется редко; после 
 
 
 def who_context(request):
-    return {"who": request.session.get("who")}
+    saved = request.session.get("sheets") or {}
+    waiting = [s for s in saved.get("data") or [] if s["status"] == "approved" and not s.get("result")]
+    return {"who": request.session.get("who"),
+            "flash": request.session.pop("flash", None),   # сообщение после отправки формы — один раз
+            "sheets_waiting": len(waiting)}                 # счётчик на вкладке преподавателя
+
+
+def _flash(request, text, ok=True):
+    request.session["flash"] = {"text": str(text), "ok": ok}
 
 
 def login_required(view):
@@ -103,6 +113,29 @@ def _profile(request, who):
     return _saved(request, "profile", lambda: gaudi.profile(who["kind"], who["id"]))
 
 
+DATES = ("requested_at", "issued_at", "valid_until", "graded_at")
+
+
+def _with_dates(sheets):
+    """Даты листов из JSON (строки) — в datetime, чтобы шаблон показал их по-местному."""
+    return [dict(x, **{k: parse_datetime(x[k]) for k in DATES if x.get(k)}) for x in sheets]
+
+
+def _sheets(request, who):
+    """Экзаменационные листы человека; при ошибке Гауди — пустой список, страница всё равно открывается."""
+    try:
+        return _with_dates(_saved(request, "sheets", lambda: gaudi.exam_sheets(who["kind"], who["id"])))
+    except gaudi.GaudiError:
+        return []
+
+
+def _forget(request, *names):
+    """После отправки формы — свежие данные из Гауди при следующем показе."""
+    for name in list(request.session.keys()):
+        if name in names or name.split(":")[0] in names:
+            del request.session[name]
+
+
 def _profile_and_lessons(request):
     """Профиль из Гауди и пары группы студента. Ошибки — текстом, страница всё равно открывается."""
     who = request.session["who"]
@@ -125,6 +158,8 @@ def _profile_and_lessons(request):
 def home(request):
     """Сегодня: профиль и пары дня (текущая подсвечена, следующая отмечена)."""
     context = _profile_and_lessons(request)
+    if context["profile"]:
+        context["sheets"] = [x for x in _sheets(request, request.session["who"]) if x["status"] in ("requested", "approved")]
     now = timezone.localtime()
     day = now.isoweekday()
     context.update(today=now.date(), weekday=WEEKDAYS[day - 1])
@@ -159,4 +194,62 @@ def study(request):
             context["transcript"] = _saved(request, "transcript:" + lang, lambda: gaudi.transcript(who["id"], lang))
         except gaudi.GaudiError as exc:
             context["errors"].append(str(exc))
+        if context["transcript"]:
+            context["transcript"] = copy.deepcopy(context["transcript"])  # копия: в сессии — ответ Гауди как есть
+            latest = {}
+            for sheet in _sheets(request, who):  # свежие сверху — по каждой дисциплине берём последний запрос
+                latest.setdefault(sheet["row"], sheet)
+            for sem in context["transcript"]["semesters"]:
+                for item in sem["items"]:
+                    item["sheet"] = latest.get(item.get("row"))
     return render(request, "cabinet/study.html", context)
+
+
+@login_required
+@require_POST
+def request_sheet(request):
+    """Студент просит экзаменационный лист по долгу; решение — за учебным отделом в Гауди."""
+    who = request.session["who"]
+    if who["kind"] != "student":
+        raise Http404
+    try:
+        gaudi.request_sheet(who["id"], int(request.POST.get("row", 0)))
+        _flash(request, _("Запрос отправлен в учебный отдел. Лист выдадут после оплаты пересдачи."))
+    except (ValueError, gaudi.GaudiError) as exc:
+        _flash(request, exc if isinstance(exc, gaudi.GaudiError) else _("Не та строка."), ok=False)
+    _forget(request, "sheets")
+    return redirect("study")
+
+
+@login_required
+def sheets(request):
+    """Преподаватель: экзаменационные листы, где он экзаменатор, и ввод баллов."""
+    who = request.session["who"]
+    if who["kind"] != "staff":
+        raise Http404
+    context = {"errors": [], "sheets": []}
+    try:
+        context["sheets"] = _with_dates(_saved(request, "sheets", lambda: gaudi.exam_sheets("staff", who["id"])))
+    except gaudi.GaudiError as exc:
+        context["errors"].append(str(exc))
+    return render(request, "cabinet/sheets.html", context)
+
+
+@login_required
+@require_POST
+def grade_sheet(request, sheet_id):
+    who = request.session["who"]
+    if who["kind"] != "staff":
+        raise Http404
+    try:
+        scores = {name: int(request.POST.get(name, "")) for name in ("first_module", "second_module", "exam")}
+    except ValueError:
+        _flash(request, _("Баллы — целые числа."), ok=False)
+        return redirect("sheets")
+    try:
+        gaudi.grade_sheet(who["id"], sheet_id, scores)
+        _flash(request, _("Баллы по листу №%(n)s записаны в Гауди.") % {"n": sheet_id})
+    except gaudi.GaudiError as exc:
+        _flash(request, exc, ok=False)
+    _forget(request, "sheets")
+    return redirect("sheets")

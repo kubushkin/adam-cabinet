@@ -25,10 +25,17 @@
   {% with name=request.resolver_match.url_name %}
   <a href="{% url 'home' %}"{% if name == 'home' %} class="on" aria-current="page"{% endif %}>{% translate "Сегодня" %}</a>
   <a href="{% url 'week' %}"{% if name == 'week' %} class="on" aria-current="page"{% endif %}>{% translate "Расписание" %}</a>
+  {% if who.kind == "student" %}
   <a href="{% url 'study' %}"{% if name == 'study' %} class="on" aria-current="page"{% endif %}>{% translate "Учёба" %}</a>
+  {% else %}
+  <a href="{% url 'sheets' %}"{% if name == 'sheets' %} class="on" aria-current="page"{% endif %}>{% translate "Экз. листы" %}{% if sheets_waiting %} <span class="badge">{{ sheets_waiting }}</span>{% endif %}</a>
+  {% endif %}
   {% endwith %}
 </div></nav>
 {% endif %}
-<main>{% block content %}{% endblock %}</main>
+<main>
+{% if flash %}<div class="msg {% if flash.ok %}ok{% else %}error{% endif %}" role="status">{{ flash.text }}</div>{% endif %}
+{% block content %}{% endblock %}
+</main>
 </body>
 </html>

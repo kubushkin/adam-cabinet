@@ -65,3 +65,19 @@ nav.tabs a.on { color: var(--ink); border-bottom-color: var(--navy); }
 .marks li.failed { background: var(--bad-bg); border-radius: 10px; padding: 10px; margin: 2px -10px; border-top-color: transparent; }
 .marks li.failed + li { border-top-color: transparent; }
 .marks li.failed .score b, .marks li.failed .score span { color: var(--bad); }
+.msg.ok { background: var(--ok-bg); color: var(--ok); }
+.badge { display: inline-block; min-width: 20px; padding: 0 6px; border-radius: 999px; background: var(--bad); color: #fff;
+  font-size: 12px; line-height: 20px; text-align: center; }
+/* экзаменационный лист */
+.sheet { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; margin-top: 6px; }
+.sheet form { margin: 0; }
+.btn.small { display: inline-block; padding: 8px 12px; font-size: 14px; background: #fff; border-color: var(--bad); color: var(--bad); cursor: pointer; font-family: inherit; }
+.examsheet.open { border-color: var(--navy); }
+.examsheet dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; margin: 0; }
+.examsheet dt { color: var(--muted); font-size: 14px; }
+.examsheet dd { margin: 0; min-width: 0; }
+.grade { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; align-items: end; }
+.grade label { display: flex; flex-direction: column; gap: 4px; font-size: 14px; color: var(--muted); }
+.grade input { font: inherit; font-size: 18px; padding: 10px; border: 1px solid var(--line); border-radius: 10px; width: 100%; color: var(--ink); }
+.grade button { grid-column: 1 / -1; cursor: pointer; font-family: inherit; }
+@media (max-width: 420px) { .examsheet dl { grid-template-columns: 1fr; } .examsheet dt { margin-top: 4px; } }

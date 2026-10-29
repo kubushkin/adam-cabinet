@@ -14,6 +14,7 @@
           <b>{{ item.name }}</b>
           <span class="muted">{% translate "кредиты" %}: {{ item.credits|floatformat:"-1" }} · {{ item.control }}</span>
           <span class="muted">{% translate "М1" %} {{ item.first_module }} · {% translate "М2" %} {{ item.second_module }} · {% translate "экз." %} {{ item.exam }}{% if item.additional %} · {% translate "доп." %} {{ item.additional }}{% endif %}</span>
+          {% if item.failed %}{% include "cabinet/_sheet_request.html" with sheet=item.sheet %}{% endif %}
         </div>
         <div class="score"><b>{{ item.points|floatformat:"-1" }}</b><span>{% if item.letter %}{{ item.letter }} · {% endif %}{{ item.mark }}</span></div>
       </li>

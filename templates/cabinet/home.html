@@ -17,6 +17,18 @@
     <p><span class="tag {% if h.active %}ok{% else %}bad{% endif %}">{{ h.state }}</span> <span class="muted">ID {{ h.id }}</span></p>
   </div>
 </section>
+{% if sheets %}
+<section class="card">
+  <h2>{% translate "Экзаменационные листы" %}</h2>
+  {% if h.type == "student" %}
+    {% for sheet in sheets %}<p>{{ sheet.discipline }} — {% if sheet.status == "approved" %}{% blocktranslate with n=sheet.id date=sheet.valid_until|date:"d.m.Y" who=sheet.examiner %}лист №{{ n }} выдан до {{ date }}, экзаменатор {{ who }}{% endblocktranslate %}{% else %}{% translate "запрос в учебном отделе" %}{% endif %}</p>{% endfor %}
+    <a href="{% url 'study' %}">{% translate "Учёба" %} →</a>
+  {% elif sheets_waiting %}
+    <p>{% blocktranslate with n=sheets_waiting %}Ждут ваших баллов: {{ n }}.{% endblocktranslate %}</p>
+    <a href="{% url 'sheets' %}">{% translate "Открыть" %} →</a>
+  {% endif %}
+</section>
+{% endif %}
 {% if h.type == "student" %}
 <section class="card">
   <h2>{% translate "Сегодня" %}, {{ weekday|lower }} {{ today|date:"j.m" }}</h2>

@@ -67,14 +67,14 @@ class LoginTestCase(TestCase):
 
     @mock.patch("cabinet.gaudi.requests.get")
     def test_login_and_profile(self, get):
-        get.return_value = fake_response(200, PROFILE)
+        get.side_effect = lambda url, **kw: fake_response(200, {"sheets": []} if url.endswith("/exam-sheets/") else PROFILE)
         self.assertRedirects(self.login(FakeClient(token())), "/", fetch_redirect_response=False)
         self.assertEqual(self.client.session["who"], {"kind": "student", "id": 20231001, "name": "Айпери Асанова"})
         page = self.client.get("/").content.decode()
         self.assertIn("Асанова Айпери Бакытовна", page)
         self.assertIn("ИСТ-5-26", page)
-        self.assertEqual(get.call_args.args[0], "http://gaudi.test/api/cabinet/student/20231001/")
-        self.assertEqual(get.call_args.kwargs["headers"], {"Authorization": "Api-Key k.k"})
+        self.assertEqual(get.call_args_list[0].args[0], "http://gaudi.test/api/cabinet/student/20231001/")
+        self.assertEqual(get.call_args_list[0].kwargs["headers"], {"Authorization": "Api-Key k.k"})
 
     def test_login_must_be_gaudi_id(self):
         page = self.login(FakeClient(token("aiperi"))).content.decode()
@@ -140,6 +140,8 @@ class ScheduleTestCase(TestCase):
 
     def answers(self, url, **kwargs):
         """Один requests.get на всех: Гауди и расписание различаем по адресу."""
+        if url.endswith("/exam-sheets/"):
+            return fake_response(200, {"sheets": []})
         if "/api/cabinet/" in url:
             self.gaudi_calls += 1
             return fake_response(200, PROFILE)
@@ -197,59 +199,173 @@ class ScheduleTestCase(TestCase):
 
 TRANSCRIPT = {"student_id": 20231001, "gpa": 3.5, "semesters": [
     {"semestr": 1, "gpa": 3.5, "items": [
-        {"code": 11, "name": "Программирование", "hours": 150.0, "credits": 5.0, "control": "Экзамен",
+        {"row": 101, "code": 11, "name": "Программирование", "hours": 150.0, "credits": 5.0, "control": "Экзамен",
          "first_module": 28, "second_module": 27, "exam": 35, "additional": 0, "points": 90.0,
          "mark": "Отлично", "letter": "A-", "gpa": 3.67},
-        {"code": 12, "name": "История Кыргызстана", "hours": 90.0, "credits": 3.0, "control": "Зачёт",
+        {"row": 102, "code": 12, "name": "История Кыргызстана", "hours": 90.0, "credits": 3.0, "control": "Зачёт",
          "first_module": 20, "second_module": 22, "exam": 30, "additional": 5, "points": 77.0,
          "mark": "Хорошо", "letter": "B", "gpa": 3.33}]},
     {"semestr": 2, "gpa": None, "items": [
-        {"code": 13, "name": "Базы данных", "hours": 150.0, "credits": 5.0, "control": "Экзамен",
+        {"row": 103, "code": 13, "name": "Базы данных", "hours": 150.0, "credits": 5.0, "control": "Экзамен",
          "first_module": 25, "second_module": 0, "exam": 0, "additional": 0, "points": 25.0,
          "mark": "Неуд.", "letter": None, "gpa": None, "failed": True}]},
 ]}
 
 
+def sheet(**extra):
+    """Экзаменационный лист, как его отдаёт Гауди."""
+    data = {"id": 5, "row": 103, "code": "13", "discipline": "Базы данных", "semestr": 2, "control": "Экзамен",
+            "status": "approved", "requested_at": "2026-10-28T09:00:00Z", "issued_at": "2026-10-28T10:00:00Z",
+            "valid_until": "2026-11-07T10:00:00Z", "examiner": "Асанов Бакыт Т.", "reject_reason": None,
+            "result": None, "graded_at": None}
+    data.update(extra)
+    return data
+
+
+class GaudiStub:
+    """Вместо Гауди: ответы по адресу, запросы записываются."""
+
+    def __init__(self, test):
+        self.sheets, self.transcript, self.post_answer, self.calls = [], TRANSCRIPT, (201, {}), []
+        for method in ("get", "post"):
+            patcher = mock.patch("requests." + method, side_effect=getattr(self, method))
+            patcher.start()
+            test.addCleanup(patcher.stop)
+
+    def get(self, url, **kwargs):
+        self.calls.append(("get", url, kwargs))
+        if url.endswith("/transcript/"):
+            return fake_response(200, self.transcript) if self.transcript else fake_response(500)
+        if url.endswith("/exam-sheets/"):
+            return fake_response(200, {"sheets": self.sheets})
+        return fake_response(200, PROFILE)
+
+    def post(self, url, **kwargs):
+        self.calls.append(("post", url, kwargs))
+        return fake_response(*self.post_answer)
+
+    def count(self, method, end):
+        return sum(1 for m, url, _ in self.calls if m == method and url.endswith(end))
+
+
 @override_settings(OIDC=OIDC, GAUDI_API_URL="http://gaudi.test", GAUDI_API_KEY="k.k")
 class StudyTestCase(TestCase):
-    """Учёба: оценки по семестрам из транскрипта Гауди."""
+    """Учёба: оценки по семестрам из транскрипта Гауди и запрос экзаменационного листа по долгу."""
 
     def setUp(self):
         with mock.patch("cabinet.oidc.client", return_value=FakeClient(token())):
             self.client.get("/auth/student/callback/")
+        self.gaudi = GaudiStub(self)
 
-    @mock.patch("requests.get", return_value=fake_response(200, TRANSCRIPT))
-    def test_semesters_and_gpa(self, get):
+    def test_semesters_and_gpa(self):
         page = self.client.get("/study/").content.decode()
-        self.assertEqual(get.call_args.args[0], "http://gaudi.test/api/cabinet/student/20231001/transcript/")
-        self.assertEqual(get.call_args.kwargs["params"], {"lang": "ru"})
+        url, kwargs = [(u, k) for m, u, k in self.gaudi.calls if u.endswith("/transcript/")][0]
+        self.assertEqual(url, "http://gaudi.test/api/cabinet/student/20231001/transcript/")
+        self.assertEqual(kwargs["params"], {"lang": "ru"})
         self.assertIn("GPA 3,5", page)                        # по-русски — с запятой
         self.assertIn("Программирование", page)
         self.assertIn("A- · Отлично", page)
         self.assertIn("доп. 5", page)                          # дополнительные баллы — только если есть
         self.assertLess(page.index("2 семестр"), page.index("1 семестр"))  # свежий семестр сверху
         self.assertEqual(page.count('class="failed"'), 1)     # долг выделен, сданные — нет
+        self.assertEqual(page.count("Запросить экзаменационный лист"), 1)  # кнопка — только у долга
 
-    @mock.patch("requests.get", return_value=fake_response(200, TRANSCRIPT))
-    def test_kept_in_session_per_language(self, get):
+    def test_kept_in_session_per_language(self):
         self.client.get("/study/")
         self.client.get("/study/")
-        self.assertEqual(get.call_count, 1)
+        self.assertEqual(self.gaudi.count("get", "/transcript/"), 1)
         self.client.post("/i18n/setlang/", {"language": "en", "next": "/study/"})
         self.client.get("/study/")
-        self.assertEqual(get.call_count, 2)                   # другой язык — названия дисциплин заново
-        self.assertEqual(get.call_args.kwargs["params"], {"lang": "en"})
+        self.assertEqual(self.gaudi.count("get", "/transcript/"), 2)   # другой язык — названия дисциплин заново
 
-    @mock.patch("requests.get", return_value=fake_response(500))
-    def test_gaudi_error_is_shown(self, get):
+    def test_gaudi_error_is_shown(self):
+        self.gaudi.transcript = None
         page = self.client.get("/study/").content.decode()
         self.assertIn("Гауди ответил ошибкой 500", page)
 
-    @mock.patch("requests.get")
-    def test_staff_has_no_transcript(self, get):
+    def test_request_sheet(self):
+        self.client.get("/study/")
+        answer = self.client.post("/study/sheet/", {"row": "103"})
+        self.assertRedirects(answer, "/study/", fetch_redirect_response=False)
+        post = [k for m, u, k in self.gaudi.calls if m == "post"][0]
+        self.assertEqual(post["json"], {"row": 103})
+        self.gaudi.sheets = [sheet(status="requested")]
+        page = self.client.get("/study/").content.decode()
+        self.assertIn("Запрос отправлен в учебный отдел", page)          # сообщение — один раз
+        self.assertIn("в учебном отделе", page)
+        self.assertNotIn("Запросить экзаменационный лист", page)
+        self.assertEqual(self.gaudi.count("get", "/exam-sheets/"), 2)     # после запроса — свежий список
+        self.assertNotIn("Запрос отправлен", self.client.get("/study/").content.decode())
+
+    def test_refused_request_shows_reason(self):
+        self.gaudi.post_answer = (400, {"detail": "Не больше 3 запросов в сутки. Попробуйте завтра."})
+        self.client.post("/study/sheet/", {"row": "103"})
+        self.assertIn("Не больше 3 запросов в сутки", self.client.get("/study/").content.decode())
+
+    def test_sheet_statuses(self):
+        self.gaudi.sheets = [sheet()]
+        page = self.client.get("/study/").content.decode()
+        self.assertIn("Лист №5 выдан", page)
+        self.assertIn("Действителен до 07.11.2026 16:00 · экзаменатор Асанов Бакыт Т.", page)  # время — по Бишкеку
+        home = self.client.get("/").content.decode()
+        self.assertIn("лист №5 выдан до 07.11.2026, экзаменатор Асанов Бакыт Т.", home)  # уведомление на «Сегодня»
+
+    def test_rejected_can_ask_again(self):
+        self.gaudi.sheets = [sheet(status="rejected", reject_reason="Нет оплаты", examiner=None)]
+        page = self.client.get("/study/").content.decode()
+        self.assertIn("Отказано: Нет оплаты", page)
+        self.assertIn("Запросить экзаменационный лист", page)
+
+    def test_staff_has_no_transcript(self):
         session = self.client.session
         session["who"] = {"kind": "staff", "id": 5, "name": "Преподаватель"}
         session.save()
         page = self.client.get("/study/").content.decode()
         self.assertIn("Этот раздел — для студентов.", page)
-        get.assert_not_called()
+        self.assertEqual(self.gaudi.count("get", "/transcript/"), 0)
+        self.assertEqual(self.client.post("/study/sheet/", {"row": "103"}).status_code, 404)
+
+
+@override_settings(OIDC=OIDC, GAUDI_API_URL="http://gaudi.test", GAUDI_API_KEY="k.k")
+class TeacherSheetsTestCase(TestCase):
+    """Преподаватель видит листы, где он экзаменатор, и выставляет баллы."""
+
+    def setUp(self):
+        session = self.client.session
+        session["who"] = {"kind": "staff", "id": 777, "name": "Асанов Бакыт"}
+        session.save()
+        self.gaudi = GaudiStub(self)
+        self.gaudi.sheets = [sheet(student={"id": 20231001, "full_name": "Асанова Айпери Бакытовна", "group": "ИСТ-5-26"},
+                                   current={"first_module": 25, "second_module": 0, "exam": 0, "points": 25.0,
+                                            "mark": "Неуд."})]
+
+    def test_list_and_badge(self):
+        self.client.get("/")                                   # «Сегодня» подтягивает листы — счётчик на вкладке
+        page = self.client.get("/sheets/").content.decode()
+        self.assertIn("Лист №5", page)
+        self.assertIn("Асанова Айпери Бакытовна · ID 20231001", page)
+        self.assertIn('<span class="badge">1</span>', page)
+        self.assertIn('name="first_module" min="0" max="100" required value="25"', page)
+
+    def test_grade(self):
+        self.gaudi.post_answer = (200, {})
+        answer = self.client.post("/sheets/5/", {"first_module": "25", "second_module": "30", "exam": "60"})
+        self.assertRedirects(answer, "/sheets/", fetch_redirect_response=False)
+        url, kwargs = [(u, k) for m, u, k in self.gaudi.calls if m == "post"][0]
+        self.assertEqual(url, "http://gaudi.test/api/cabinet/staff/777/exam-sheets/5/")
+        self.assertEqual(kwargs["json"], {"first_module": 25, "second_module": 30, "exam": 60})
+        self.assertIn("Баллы по листу №5 записаны в Гауди.", self.client.get("/sheets/").content.decode())
+
+    def test_grade_refused(self):
+        self.gaudi.post_answer = (400, {"detail": "Срок листа истёк. Студенту нужно запросить новый."})
+        self.client.post("/sheets/5/", {"first_module": "25", "second_module": "30", "exam": "60"})
+        self.assertIn("Срок листа истёк", self.client.get("/sheets/").content.decode())
+        self.client.post("/sheets/5/", {"first_module": "a", "second_module": "30", "exam": "60"})
+        self.assertIn("Баллы — целые числа.", self.client.get("/sheets/").content.decode())
+
+    def test_students_cannot_open(self):
+        session = self.client.session
+        session["who"] = {"kind": "student", "id": 20231001, "name": "Айпери"}
+        session.save()
+        self.assertEqual(self.client.get("/sheets/").status_code, 404)
+        self.assertEqual(self.client.post("/sheets/5/", {"exam": "1"}).status_code, 404)

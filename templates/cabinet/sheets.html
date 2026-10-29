@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Экзаменационные листы" %}{% endblock %}
+{% block content %}
+{% for error in errors %}<div class="msg error">{{ error }}</div>{% endfor %}
+<h1>{% translate "Экзаменационные листы" %}</h1>
+{% for sheet in sheets %}
+<section class="card examsheet{% if sheet.status == 'approved' %} open{% endif %}">
+  <h2>{% blocktranslate with n=sheet.id %}Лист №{{ n }}{% endblocktranslate %}
+    {% if sheet.status == "approved" %}<span class="tag next">{% translate "ждёт баллов" %}</span>
+    {% elif sheet.status == "graded" %}<span class="tag ok">{% translate "баллы выставлены" %}</span>
+    {% else %}<span class="tag bad">{% translate "срок истёк" %}</span>{% endif %}</h2>
+  <dl>
+    <dt>{% translate "Студент" %}</dt><dd>{{ sheet.student.full_name }} · ID {{ sheet.student.id }}</dd>
+    <dt>{% translate "Группа" %}</dt><dd>{{ sheet.student.group }}</dd>
+    <dt>{% translate "Дисциплина" %}</dt><dd>({{ sheet.code }}) {{ sheet.discipline }} · {{ sheet.control }} · {% blocktranslate with n=sheet.semestr %}{{ n }} семестр{% endblocktranslate %}</dd>
+    <dt>{% translate "Выдан" %}</dt><dd>{{ sheet.issued_at|date:"d.m.Y H:i" }}</dd>
+    <dt>{% translate "Действителен до" %}</dt><dd>{{ sheet.valid_until|date:"d.m.Y H:i" }}</dd>
+    <dt>{% translate "По ведомости" %}</dt><dd>{% translate "М1" %} {{ sheet.current.first_module }} · {% translate "М2" %} {{ sheet.current.second_module }} · {% translate "ПЭ" %} {{ sheet.current.exam }} · {% translate "итог" %} {{ sheet.current.points|floatformat:"-1" }} {{ sheet.current.mark }}</dd>
+    {% if sheet.result %}<dt>{% translate "По листу" %}</dt><dd>{% translate "М1" %} {{ sheet.result.first_module }} · {% translate "М2" %} {{ sheet.result.second_module }} · {% translate "ПЭ" %} {{ sheet.result.exam }} · {{ sheet.graded_at|date:"d.m.Y H:i" }}</dd>{% endif %}
+  </dl>
+  {% if sheet.status == "approved" %}
+  <form class="grade" method="post" action="{% url 'grade-sheet' sheet.id %}">{% csrf_token %}
+    <label>{% translate "I модуль" %}<input type="number" name="first_module" min="0" max="100" required value="{{ sheet.current.first_module }}"></label>
+    <label>{% translate "II модуль" %}<input type="number" name="second_module" min="0" max="100" required value="{{ sheet.current.second_module }}"></label>
+    <label>{% translate "Экзамен" %}<input type="number" name="exam" min="0" max="100" required></label>
+    <button type="submit" class="btn primary">{% translate "Записать баллы" %}</button>
+  </form>
+  <p class="muted">{% translate "После записи итог и оценку считает Гауди; исправить баллы может только учебный отдел." %}</p>
+  {% endif %}
+</section>
+{% empty %}
+<section class="card"><p class="muted">{% translate "Экзаменационных листов на вас нет. Когда учебный отдел назначит вас экзаменатором, лист появится здесь." %}</p></section>
+{% endfor %}
+{% endblock %}

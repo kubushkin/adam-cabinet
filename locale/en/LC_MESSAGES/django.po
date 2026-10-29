@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-29 15:15+0600\n"
+"POT-Creation-Date: 2026-10-29 15:49+0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -29,7 +29,11 @@ msgstr "Gaudi is not responding right now. Please try again later."
 msgid "Вас нет в Гауди. Обратитесь в учебный отдел."
 msgstr "You are not found in Gaudi. Please contact the academic office."
 
-#: cabinet/gaudi.py:27
+#: cabinet/gaudi.py:31
+msgid "Гауди не принял запрос."
+msgstr "Gaudi did not accept the request."
+
+#: cabinet/gaudi.py:33
 #, python-format
 msgid "Гауди ответил ошибкой %(code)s."
 msgstr "Gaudi returned error %(code)s."
@@ -47,17 +51,36 @@ msgstr "Gaudi is not responding right now. Please try again later."
 msgid "Расписание ответило ошибкой %(code)s."
 msgstr "Gaudi returned error %(code)s."
 
-#: cabinet/views.py:59
+#: cabinet/views.py:69
 msgid "Вход не завершён. Попробуйте ещё раз."
 msgstr "Sign-in was not completed. Please try again."
 
-#: cabinet/views.py:64
+#: cabinet/views.py:74
 #, python-format
 msgid "Логин %(login)s не похож на ID в Гауди. Обратитесь в ИО."
 msgstr ""
 "Login %(login)s does not look like a Gaudi ID. Please contact the IT "
-"department.Login %(login)s does not look like a Gaudi ID. Please contact the"
-" IT department."
+"department.Login %(login)s does not look like a Gaudi ID. Please contact the "
+"IT department."
+
+#: cabinet/views.py:217
+msgid "Запрос отправлен в учебный отдел. Лист выдадут после оплаты пересдачи."
+msgstr ""
+"Request sent to the academic office. The sheet is issued after the retake "
+"fee is paid."
+
+#: cabinet/views.py:219
+msgid "Не та строка."
+msgstr "Wrong row."
+
+#: cabinet/views.py:247
+msgid "Баллы — целые числа."
+msgstr "Points must be whole numbers."
+
+#: cabinet/views.py:251
+#, python-format
+msgid "Баллы по листу №%(n)s записаны в Гауди."
+msgstr "Points for sheet No. %(n)s saved to Gaudi."
 
 #: config/settings.py:76
 msgid "Русский"
@@ -84,7 +107,7 @@ msgid "Разделы"
 msgstr "Sections"
 
 #: templates/base.html:26 templates/cabinet/home.html:3
-#: templates/cabinet/home.html:22
+#: templates/cabinet/home.html:34
 msgid "Сегодня"
 msgstr "Today"
 
@@ -93,10 +116,14 @@ msgstr "Today"
 msgid "Расписание"
 msgstr "Timetable"
 
-#: templates/base.html:28 templates/cabinet/study.html:3
-#: templates/cabinet/study.html:6
+#: templates/base.html:29 templates/cabinet/home.html:25
+#: templates/cabinet/study.html:3 templates/cabinet/study.html:6
 msgid "Учёба"
 msgstr "Studies"
+
+#: templates/base.html:31
+msgid "Экз. листы"
+msgstr "Exam sheets"
 
 #: templates/cabinet/_lesson.html:5
 msgid "Сейчас"
@@ -119,7 +146,43 @@ msgstr "building %(n)s"
 msgid "Ссылка на занятие"
 msgstr "Class link"
 
-#: templates/cabinet/home.html:12
+#: templates/cabinet/_sheet_request.html:4
+msgid "Запрос на экзаменационный лист — в учебном отделе"
+msgstr "Exam sheet request is with the academic office"
+
+#: templates/cabinet/_sheet_request.html:6
+#, python-format
+msgid "Лист №%(n)s выдан"
+msgstr "Sheet No. %(n)s issued"
+
+#: templates/cabinet/_sheet_request.html:7
+#, python-format
+msgid "Действителен до %(date)s · экзаменатор %(who)s"
+msgstr "Valid until %(date)s · examiner %(who)s"
+
+#: templates/cabinet/_sheet_request.html:9
+#, python-format
+msgid "Баллы по листу №%(n)s выставлены"
+msgstr "Points for sheet No. %(n)s are in"
+
+#: templates/cabinet/_sheet_request.html:11
+msgid "Отказано"
+msgstr "Refused"
+
+#: templates/cabinet/_sheet_request.html:12
+#, python-format
+msgid "Срок листа №%(n)s истёк."
+msgstr "Sheet No. %(n)s has expired."
+
+#: templates/cabinet/_sheet_request.html:15
+msgid "Запросить экзаменационный лист"
+msgstr "Request an exam sheet"
+
+#: templates/cabinet/_sheet_request.html:17
+msgid "Лист выдаёт учебный отдел после оплаты пересдачи."
+msgstr "The academic office issues the sheet after the retake fee is paid."
+
+#: templates/cabinet/home.html:12 templates/cabinet/sheets.html:14
 msgid "Студент"
 msgstr "Student"
 
@@ -132,21 +195,44 @@ msgstr "Year %(course)s"
 msgid "Сотрудник"
 msgstr "Staff"
 
-#: templates/cabinet/home.html:26
+#: templates/cabinet/home.html:22 templates/cabinet/sheets.html:3
+#: templates/cabinet/sheets.html:6
+msgid "Экзаменационные листы"
+msgstr "Exam sheets"
+
+#: templates/cabinet/home.html:24
+#, python-format
+msgid "лист №%(n)s выдан до %(date)s, экзаменатор %(who)s"
+msgstr "sheet No. %(n)s issued until %(date)s, examiner %(who)s"
+
+#: templates/cabinet/home.html:24
+msgid "запрос в учебном отделе"
+msgstr "request is with the academic office"
+
+#: templates/cabinet/home.html:27
+#, python-format
+msgid "Ждут ваших баллов: %(n)s."
+msgstr "Waiting for your points: %(n)s."
+
+#: templates/cabinet/home.html:28
+msgid "Открыть"
+msgstr "Open"
+
+#: templates/cabinet/home.html:38
 msgid "Сегодня пар нет."
 msgstr "No classes today."
 
-#: templates/cabinet/home.html:28
+#: templates/cabinet/home.html:40
 msgid "Расписание на неделю"
 msgstr "Weekly timetable"
 
-#: templates/cabinet/home.html:31 templates/cabinet/week.html:18
+#: templates/cabinet/home.html:43 templates/cabinet/week.html:18
 msgid ""
 "Ваши пары из расписания появятся здесь, когда учебный отдел сопоставит "
 "преподавателей с расписанием."
 msgstr ""
-"Your classes will appear here once the academic office matches teachers with"
-" the timetable."
+"Your classes will appear here once the academic office matches teachers with "
+"the timetable."
 
 #: templates/cabinet/login.html:3
 msgid "Вход"
@@ -175,22 +261,105 @@ msgstr "I am a teacher / staff member"
 msgid "Вход ещё не настроен."
 msgstr "Sign-in is not configured yet."
 
-#: templates/cabinet/study.html:10
+#: templates/cabinet/sheets.html:9
+#, python-format
+msgid "Лист №%(n)s"
+msgstr "Sheet No. %(n)s"
+
+#: templates/cabinet/sheets.html:10
+msgid "ждёт баллов"
+msgstr "awaiting points"
+
+#: templates/cabinet/sheets.html:11
+msgid "баллы выставлены"
+msgstr "points in"
+
+#: templates/cabinet/sheets.html:12
+msgid "срок истёк"
+msgstr "expired"
+
+#: templates/cabinet/sheets.html:15
+msgid "Группа"
+msgstr "Group"
+
+#: templates/cabinet/sheets.html:16
+msgid "Дисциплина"
+msgstr "Course"
+
+#: templates/cabinet/sheets.html:16 templates/cabinet/study.html:10
 #, python-format
 msgid "%(n)s семестр"
 msgstr "Semester %(n)s"
 
-#: templates/cabinet/study.html:15
-msgid "кредиты"
-msgstr "credits"
+#: templates/cabinet/sheets.html:17
+msgid "Выдан"
+msgstr "Issued"
 
+#: templates/cabinet/sheets.html:18
+msgid "Действителен до"
+msgstr "Valid until"
+
+#: templates/cabinet/sheets.html:19
+msgid "По ведомости"
+msgstr "Per grade sheet"
+
+#: templates/cabinet/sheets.html:19 templates/cabinet/sheets.html:20
 #: templates/cabinet/study.html:16
 msgid "М1"
 msgstr "M1"
 
+#: templates/cabinet/sheets.html:19 templates/cabinet/sheets.html:20
 #: templates/cabinet/study.html:16
 msgid "М2"
 msgstr "M2"
+
+#: templates/cabinet/sheets.html:19 templates/cabinet/sheets.html:20
+msgid "ПЭ"
+msgstr "Exam"
+
+#: templates/cabinet/sheets.html:19
+msgid "итог"
+msgstr "total"
+
+#: templates/cabinet/sheets.html:20
+msgid "По листу"
+msgstr "Per exam sheet"
+
+#: templates/cabinet/sheets.html:24
+msgid "I модуль"
+msgstr "Module I"
+
+#: templates/cabinet/sheets.html:25
+msgid "II модуль"
+msgstr "Module II"
+
+#: templates/cabinet/sheets.html:26
+msgid "Экзамен"
+msgstr "Exam"
+
+#: templates/cabinet/sheets.html:27
+msgid "Записать баллы"
+msgstr "Save points"
+
+#: templates/cabinet/sheets.html:29
+msgid ""
+"После записи итог и оценку считает Гауди; исправить баллы может только "
+"учебный отдел."
+msgstr ""
+"After saving, Gaudi calculates the total and the mark; only the academic "
+"office can correct points."
+
+#: templates/cabinet/sheets.html:33
+msgid ""
+"Экзаменационных листов на вас нет. Когда учебный отдел назначит вас "
+"экзаменатором, лист появится здесь."
+msgstr ""
+"No exam sheets for you. When the academic office makes you an examiner, the "
+"sheet will appear here."
+
+#: templates/cabinet/study.html:15
+msgid "кредиты"
+msgstr "credits"
 
 #: templates/cabinet/study.html:16
 msgid "экз."
@@ -200,11 +369,11 @@ msgstr "exam"
 msgid "доп."
 msgstr "extra"
 
-#: templates/cabinet/study.html:23
+#: templates/cabinet/study.html:24
 msgid "Оценок пока нет."
 msgstr "No grades yet."
 
-#: templates/cabinet/study.html:26
+#: templates/cabinet/study.html:27
 msgid "Этот раздел — для студентов."
 msgstr "This section is for students."
 

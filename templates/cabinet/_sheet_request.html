@@ -1,0 +1,19 @@
+{% load i18n %}{# экзаменационный лист по долгу: статус запроса или кнопка #}
+<div class="sheet">
+  {% if sheet.status == "requested" %}
+    <span class="tag next">{% translate "Запрос на экзаменационный лист — в учебном отделе" %}</span>
+  {% elif sheet.status == "approved" %}
+    <span class="tag ok">{% blocktranslate with n=sheet.id %}Лист №{{ n }} выдан{% endblocktranslate %}</span>
+    <span class="muted">{% blocktranslate with date=sheet.valid_until|date:"d.m.Y H:i" who=sheet.examiner %}Действителен до {{ date }} · экзаменатор {{ who }}{% endblocktranslate %}</span>
+  {% elif sheet.status == "graded" %}
+    <span class="tag ok">{% blocktranslate with n=sheet.id %}Баллы по листу №{{ n }} выставлены{% endblocktranslate %}</span>
+  {% else %}
+    {% if sheet.status == "rejected" %}<span class="muted">{% translate "Отказано" %}: {{ sheet.reject_reason }}</span>
+    {% elif sheet.status == "expired" %}<span class="muted">{% blocktranslate with n=sheet.id %}Срок листа №{{ n }} истёк.{% endblocktranslate %}</span>{% endif %}
+    <form method="post" action="{% url 'request-sheet' %}">{% csrf_token %}
+      <input type="hidden" name="row" value="{{ item.row }}">
+      <button type="submit" class="btn small">{% translate "Запросить экзаменационный лист" %}</button>
+    </form>
+    <span class="muted">{% translate "Лист выдаёт учебный отдел после оплаты пересдачи." %}</span>
+  {% endif %}
+</div>
