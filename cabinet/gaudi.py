@@ -48,9 +48,9 @@ def transcript(student_id, lang):
     return _get("/api/cabinet/student/%s/transcript/" % student_id, {"lang": lang})
 
 
-def exam_sheets(kind, person_id):
+def exam_sheets(kind, person_id, lang):
     """Экзаменационные листы: у студента — его запросы, у преподавателя — где он экзаменатор."""
-    return _get("/api/cabinet/%s/%s/exam-sheets/" % (kind, person_id))["sheets"]
+    return _get("/api/cabinet/%s/%s/exam-sheets/" % (kind, person_id), {"lang": lang})["sheets"]
 
 
 def request_sheet(student_id, row):

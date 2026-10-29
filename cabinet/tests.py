@@ -351,6 +351,8 @@ class TeacherSheetsTestCase(TestCase):
         self.client.get("/sheets/")
         self.client.get("/sheets/")
         self.assertEqual(self.gaudi.count("get", "/exam-sheets/"), 2)   # новый лист виден сразу, без ожидания 5 минут
+        params = [k["params"] for m, u, k in self.gaudi.calls if u.endswith("/exam-sheets/")][0]
+        self.assertEqual(params, {"lang": "ru"})                         # названия — на языке кабинета
 
     def test_grade(self):
         self.gaudi.post_answer = (200, {})

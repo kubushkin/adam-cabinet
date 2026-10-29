@@ -27,7 +27,7 @@ PROFILE_SECONDS = 300  # профиль меняется редко; после 
 
 
 def who_context(request):
-    saved = request.session.get("sheets") or {}
+    saved = request.session.get("sheets:" + (get_language() or "ru")) or {}
     waiting = [s for s in saved.get("data") or [] if s["status"] == "approved" and not s.get("result")]
     return {"who": request.session.get("who"),
             "flash": request.session.pop("flash", None),   # сообщение после отправки формы — один раз
@@ -126,7 +126,8 @@ def _with_dates(sheets):
 def _sheets(request, who):
     """Экзаменационные листы человека; при ошибке Гауди — пустой список, страница всё равно открывается."""
     try:
-        return _with_dates(_saved(request, "sheets", lambda: gaudi.exam_sheets(who["kind"], who["id"])))
+        lang = get_language()
+        return _with_dates(_saved(request, "sheets:" + lang, lambda: gaudi.exam_sheets(who["kind"], who["id"], lang)))
     except gaudi.GaudiError:
         return []
 
@@ -250,7 +251,8 @@ def sheets(request):
     context = {"errors": [], "sheets": []}
     try:
         _forget(request, "sheets")  # вкладку открывают, чтобы увидеть новые листы — всегда свежий список
-        context["sheets"] = _with_dates(_saved(request, "sheets", lambda: gaudi.exam_sheets("staff", who["id"])))
+        lang = get_language()
+        context["sheets"] = _with_dates(_saved(request, "sheets:" + lang, lambda: gaudi.exam_sheets("staff", who["id"], lang)))
     except gaudi.GaudiError as exc:
         context["errors"].append(str(exc))
     return render(request, "cabinet/sheets.html", context)
