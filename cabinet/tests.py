@@ -206,7 +206,7 @@ TRANSCRIPT = {"student_id": 20231001, "gpa": 3.5, "semesters": [
     {"semestr": 2, "gpa": None, "items": [
         {"code": 13, "name": "Базы данных", "hours": 150.0, "credits": 5.0, "control": "Экзамен",
          "first_module": 25, "second_module": 0, "exam": 0, "additional": 0, "points": 25.0,
-         "mark": "", "letter": None, "gpa": None}]},
+         "mark": "Неуд.", "letter": None, "gpa": None, "failed": True}]},
 ]}
 
 
@@ -228,6 +228,7 @@ class StudyTestCase(TestCase):
         self.assertIn("A- · Отлично", page)
         self.assertIn("доп. 5", page)                          # дополнительные баллы — только если есть
         self.assertLess(page.index("2 семестр"), page.index("1 семестр"))  # свежий семестр сверху
+        self.assertEqual(page.count('class="failed"'), 1)     # долг выделен, сданные — нет
 
     @mock.patch("requests.get", return_value=fake_response(200, TRANSCRIPT))
     def test_kept_in_session_per_language(self, get):

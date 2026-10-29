@@ -9,7 +9,7 @@
   <section class="card">
     <h2>{% blocktranslate with n=sem.semestr %}{{ n }} семестр{% endblocktranslate %}{% if sem.gpa is not None %} <span class="muted">· GPA {{ sem.gpa }}</span>{% endif %}</h2>
     <ul class="marks">{% for item in sem.items %}
-      <li>
+      <li{% if item.failed %} class="failed"{% endif %}>
         <div class="what">
           <b>{{ item.name }}</b>
           <span class="muted">{% translate "кредиты" %}: {{ item.credits|floatformat:"-1" }} · {{ item.control }}</span>
