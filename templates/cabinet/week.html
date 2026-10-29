@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Расписание" %}{% endblock %}
+{% block content %}
+{% for error in errors %}<div class="msg error">{{ error }}</div>{% endfor %}
+{% if profile %}
+<h1>{% translate "Расписание" %}{% if profile.holder.group %} · {{ profile.holder.group }}{% endif %}</h1>
+{% if days %}
+  {% for day in days %}
+  <section class="card day{% if day.today %} today{% endif %}">
+    <h2>{{ day.title }}{% if day.today %} <span class="tag ok">{% translate "сегодня" %}</span>{% endif %}</h2>
+    {% if day.lessons %}
+      <ul class="lessons">{% for lesson in day.lessons %}{% include "cabinet/_lesson.html" %}{% endfor %}</ul>
+    {% else %}<p class="muted">{% translate "Пар нет." %}</p>{% endif %}
+  </section>
+  {% endfor %}
+{% elif profile.holder.type != "student" %}
+  <section class="card"><p class="muted">{% translate "Ваши пары из расписания появятся здесь, когда учебный отдел сопоставит преподавателей с расписанием." %}</p></section>
+{% endif %}
+{% endif %}
+{% endblock %}

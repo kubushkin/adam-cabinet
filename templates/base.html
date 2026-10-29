@@ -20,6 +20,14 @@
     {% if who %}<form method="post" action="{% url 'logout' %}">{% csrf_token %}<button type="submit" class="out">{% translate "Выйти" %}</button></form>{% endif %}
   </div>
 </div></header>
+{% if who %}
+<nav class="tabs" aria-label="{% translate "Разделы" %}"><div class="in">
+  {% with name=request.resolver_match.url_name %}
+  <a href="{% url 'home' %}"{% if name == 'home' %} class="on" aria-current="page"{% endif %}>{% translate "Сегодня" %}</a>
+  <a href="{% url 'week' %}"{% if name == 'week' %} class="on" aria-current="page"{% endif %}>{% translate "Расписание" %}</a>
+  {% endwith %}
+</div></nav>
+{% endif %}
 <main>{% block content %}{% endblock %}</main>
 </body>
 </html>

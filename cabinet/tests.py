@@ -105,3 +105,77 @@ class LoginTestCase(TestCase):
         self.assertIn("Sign in", self.client.get("/login/").content.decode())
         self.client.post("/i18n/setlang/", {"language": "ky", "next": "/login/"})
         self.assertIn('lang="ky"', self.client.get("/login/").content.decode())
+
+
+LESSONS = {"group": {"id": 1, "title": "ИСТ-5-26"}, "lector": None, "lessons": [
+    {"id": 1, "weekday": 3, "weekday_title": "Среда", "time": "08:30", "discipline": "Компьютерные сети",
+     "lesson_type": "Лекция", "lector": {"id": 7, "name": "Асанов Б. К.", "regalia": "доцент"},
+     "group": {"id": 1, "title": "ИСТ-5-26"}, "classroom": "305", "campus": "1", "link": None, "notes": None},
+    {"id": 2, "weekday": 3, "weekday_title": "Среда", "time": "10:00", "discipline": "Python",
+     "lesson_type": "Практика", "lector": {"id": 8, "name": "Петрова А. С.", "regalia": None},
+     "group": {"id": 1, "title": "ИСТ-5-26"}, "classroom": None, "campus": "zoom", "link": "https://zoom.us/j/1", "notes": None},
+    {"id": 3, "weekday": 3, "weekday_title": "Среда", "time": "13:10", "discipline": "Английский",
+     "lesson_type": "Практика", "lector": {"id": 9, "name": "Смит Дж.", "regalia": None},
+     "group": {"id": 1, "title": "ИСТ-5-26"}, "classroom": "201", "campus": "2", "link": None, "notes": None},
+    {"id": 4, "weekday": 5, "weekday_title": "Пятница", "time": "08:30", "discipline": "Математика",
+     "lesson_type": "Лекция", "lector": {"id": 7, "name": "Асанов Б. К.", "regalia": "доцент"},
+     "group": {"id": 1, "title": "ИСТ-5-26"}, "classroom": "305", "campus": "1", "link": None, "notes": None},
+]}
+
+
+@override_settings(OIDC=OIDC, GAUDI_API_URL="http://gaudi.test", GAUDI_API_KEY="k.k",
+                   SCHEDULE_API_URL="https://schedule.test", SCHEDULE_API_KEY="s.k")
+class ScheduleTestCase(TestCase):
+    """Сегодня и неделя: пары группы студента из API расписания, пара — 80 минут."""
+
+    def setUp(self):
+        from django.core.cache import cache
+        cache.clear()
+        with mock.patch("cabinet.oidc.client", return_value=FakeClient(token())):
+            self.client.get("/auth/student/callback/")
+        self.schedule_calls, self.schedule_status = [], 200
+        patcher = mock.patch("requests.get", side_effect=self.answers)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def answers(self, url, **kwargs):
+        """Один requests.get на всех: Гауди и расписание различаем по адресу."""
+        if "/api/cabinet/" in url:
+            return fake_response(200, PROFILE)
+        self.schedule_calls.append(kwargs)
+        return fake_response(self.schedule_status, LESSONS)
+
+    def at(self, text):
+        """Подменить «сейчас»: среда 28.10.2026 в указанное время (по Бишкеку)."""
+        import datetime as dt
+        from zoneinfo import ZoneInfo
+        moment = dt.datetime.fromisoformat("2026-10-28T" + text).replace(tzinfo=ZoneInfo("Asia/Bishkek"))
+        return mock.patch("cabinet.views.timezone.localtime", return_value=moment)
+
+    def test_today_marks_current_and_next(self):
+        with self.at("10:30"):
+            page = self.client.get("/").content.decode()
+        self.assertEqual(self.schedule_calls[0]["params"], {"group": "ИСТ-5-26", "lang": "ru"})
+        self.assertEqual(self.schedule_calls[0]["headers"], {"Authorization": "Api-Key s.k"})
+        self.assertIn("08:30", page)
+        self.assertIn("09:50", page)                     # конец первой пары: 08:30 + 1:20
+        self.assertIn('class="lesson past"', page)       # 08:30–09:50 уже прошла
+        self.assertIn('class="lesson now"', page)        # 10:00–11:20 идёт
+        self.assertIn('class="lesson next"', page)       # 13:10 — следующая
+        self.assertIn("https://zoom.us/j/1", page)
+        self.assertNotIn("Математика", page)             # пятничная пара — не сегодня
+
+    def test_week_and_cache(self):
+        with self.at("07:00"):
+            page = self.client.get("/schedule/").content.decode()
+            self.client.get("/")
+        self.assertIn("Математика", page)
+        self.assertEqual(page.count('class="card day'), 6)    # понедельник–суббота
+        self.assertEqual(page.count("Пар нет."), 4)
+        self.assertEqual(len(self.schedule_calls), 1)         # второй раз — из кэша
+
+    def test_schedule_down_does_not_break_page(self):
+        self.schedule_status = 500
+        page = self.client.get("/").content.decode()
+        self.assertIn("Асанова Айпери Бакытовна", page)      # профиль на месте
+        self.assertIn("Расписание ответило ошибкой 500", page)

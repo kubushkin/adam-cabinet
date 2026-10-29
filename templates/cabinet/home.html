@@ -1,7 +1,8 @@
 {% extends "base.html" %}
 {% load i18n %}
+{% block title %}{% translate "Сегодня" %}{% endblock %}
 {% block content %}
-{% if error %}<div class="msg error">{{ error }}</div>{% endif %}
+{% for error in errors %}<div class="msg error">{{ error }}</div>{% endfor %}
 {% if profile %}{% with h=profile.holder %}
 <section class="card who">
   {% if h.photo_url %}<img class="photo" src="{{ h.photo_url }}" alt="">{% else %}<div class="photo" aria-hidden="true">{{ h.full_name|slice:":1" }}</div>{% endif %}
@@ -16,5 +17,18 @@
     <p><span class="tag {% if h.active %}ok{% else %}bad{% endif %}">{{ h.state }}</span> <span class="muted">ID {{ h.id }}</span></p>
   </div>
 </section>
+{% if h.type == "student" %}
+<section class="card">
+  <h2>{% translate "Сегодня" %}, {{ weekday|lower }} {{ today|date:"j.m" }}</h2>
+  {% if today_lessons %}
+    <ul class="lessons">{% for lesson in today_lessons %}{% include "cabinet/_lesson.html" %}{% endfor %}</ul>
+  {% elif lessons is not None %}
+    <p class="muted">{% translate "Сегодня пар нет." %}</p>
+  {% endif %}
+  <a href="{% url 'week' %}">{% translate "Расписание на неделю" %} →</a>
+</section>
+{% else %}
+<section class="card"><p class="muted">{% translate "Ваши пары из расписания появятся здесь, когда учебный отдел сопоставит преподавателей с расписанием." %}</p></section>
+{% endif %}
 {% endwith %}{% endif %}
 {% endblock %}

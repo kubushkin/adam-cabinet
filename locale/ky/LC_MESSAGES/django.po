@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-29 13:20+0600\n"
+"POT-Creation-Date: 2026-10-29 14:08+0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,6 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+
 msgid "Связь с Гауди не настроена."
 msgstr "Гауди менен байланыш жөндөлгөн эмес."
 
@@ -29,12 +30,23 @@ msgstr "Сиз Гаудиде жоксуз. Окуу бөлүмүнө кайры
 msgid "Гауди ответил ошибкой %(code)s."
 msgstr "Гауди %(code)s катасы менен жооп берди."
 
+msgid "Связь с расписанием не настроена."
+msgstr "Гауди менен байланыш жөндөлгөн эмес."
+
+msgid "Расписание сейчас не отвечает. Попробуйте позже."
+msgstr "Гауди азыр жооп бербей жатат. Кийинчерээк аракет кылыңыз."
+
+#, python-format
+msgid "Расписание ответило ошибкой %(code)s."
+msgstr "Гауди %(code)s катасы менен жооп берди."
+
 msgid "Вход не завершён. Попробуйте ещё раз."
 msgstr "Кирүү аяктаган жок. Кайра аракет кылыңыз."
 
 #, python-format
 msgid "Логин %(login)s не похож на ID в Гауди. Обратитесь в ИО."
 msgstr "%(login)s логини Гаудидеги ID'ге окшобойт. Маалымат бөлүмүнө кайрылыңыз."
+"%(login)s логини Гаудидеги ID'ге окшобойт. Маалымат бөлүмүнө кайрылыңыз."
 
 msgid "Русский"
 msgstr "Орусча"
@@ -51,6 +63,31 @@ msgstr "Жеке кабинет"
 msgid "Выйти"
 msgstr "Чыгуу"
 
+msgid "Разделы"
+msgstr "Бөлүмдөр"
+
+msgid "Сегодня"
+msgstr "Бүгүн"
+
+msgid "Расписание"
+msgstr "Сабак жадыбалы"
+
+msgid "Сейчас"
+msgstr "Азыр"
+
+msgid "Следующая"
+msgstr "Кийинки"
+
+msgid "ауд."
+msgstr "ауд."
+
+#, python-format
+msgid "корпус %(n)s"
+msgstr "%(n)s-корпус"
+
+msgid "Ссылка на занятие"
+msgstr "Сабакка шилтеме"
+
 msgid "Студент"
 msgstr "Студент"
 
@@ -61,6 +98,17 @@ msgstr "%(course)s-курс"
 msgid "Сотрудник"
 msgstr "Кызматкер"
 
+msgid "Сегодня пар нет."
+msgstr "Бүгүн сабак жок."
+
+msgid "Расписание на неделю"
+msgstr "Жумалык сабак жадыбалы"
+
+msgid ""
+"Ваши пары из расписания появятся здесь, когда учебный отдел сопоставит "
+"преподавателей с расписанием."
+msgstr ""
+
 msgid "Вход"
 msgstr "Кирүү"
 
@@ -69,6 +117,7 @@ msgstr "Жеке кабинетке кирүү"
 
 msgid "Логин — ваш ID в университете, пароль — как в Moodle и Mattermost."
 msgstr "Логин — университеттеги ID'ңиз, сырсөз — Moodle жана Mattermost'тогудай."
+"Логин — университеттеги ID'ңиз, сырсөз — Moodle жана Mattermost'тогудай."
 
 msgid "Я студент"
 msgstr "Мен студентмин"
@@ -78,3 +127,9 @@ msgstr "Мен окутуучумун / кызматкермин"
 
 msgid "Вход ещё не настроен."
 msgstr "Кирүү азырынча жөндөлгөн эмес."
+
+msgid "сегодня"
+msgstr "бүгүн"
+
+msgid "Пар нет."
+msgstr "Сабак жок."

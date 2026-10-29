@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-29 13:20+0600\n"
+"POT-Creation-Date: 2026-10-29 14:08+0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,6 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
 msgid "Связь с Гауди не настроена."
 msgstr "Connection to Gaudi is not configured."
 
@@ -29,12 +30,24 @@ msgstr "You are not found in Gaudi. Please contact the academic office."
 msgid "Гауди ответил ошибкой %(code)s."
 msgstr "Gaudi returned error %(code)s."
 
+msgid "Связь с расписанием не настроена."
+msgstr "Connection to Gaudi is not configured."
+
+msgid "Расписание сейчас не отвечает. Попробуйте позже."
+msgstr "Gaudi is not responding right now. Please try again later."
+
+#, python-format
+msgid "Расписание ответило ошибкой %(code)s."
+msgstr "Gaudi returned error %(code)s."
+
 msgid "Вход не завершён. Попробуйте ещё раз."
 msgstr "Sign-in was not completed. Please try again."
 
 #, python-format
 msgid "Логин %(login)s не похож на ID в Гауди. Обратитесь в ИО."
 msgstr "Login %(login)s does not look like a Gaudi ID. Please contact the IT department."
+"Login %(login)s does not look like a Gaudi ID. Please contact the IT "
+"department."
 
 msgid "Русский"
 msgstr "Russian"
@@ -51,6 +64,31 @@ msgstr "Personal account"
 msgid "Выйти"
 msgstr "Sign out"
 
+msgid "Разделы"
+msgstr "Sections"
+
+msgid "Сегодня"
+msgstr "Today"
+
+msgid "Расписание"
+msgstr "Timetable"
+
+msgid "Сейчас"
+msgstr "Now"
+
+msgid "Следующая"
+msgstr "Next"
+
+msgid "ауд."
+msgstr "room"
+
+#, python-format
+msgid "корпус %(n)s"
+msgstr "building %(n)s"
+
+msgid "Ссылка на занятие"
+msgstr "Class link"
+
 msgid "Студент"
 msgstr "Student"
 
@@ -61,6 +99,17 @@ msgstr "Year %(course)s"
 msgid "Сотрудник"
 msgstr "Staff"
 
+msgid "Сегодня пар нет."
+msgstr "No classes today."
+
+msgid "Расписание на неделю"
+msgstr "Weekly timetable"
+
+msgid ""
+"Ваши пары из расписания появятся здесь, когда учебный отдел сопоставит "
+"преподавателей с расписанием."
+msgstr ""
+
 msgid "Вход"
 msgstr "Sign in"
 
@@ -69,6 +118,8 @@ msgstr "Sign in to your account"
 
 msgid "Логин — ваш ID в университете, пароль — как в Moodle и Mattermost."
 msgstr "Login is your university ID; the password is the same as in Moodle and Mattermost."
+"Login is your university ID; the password is the same as in Moodle and "
+"Mattermost."
 
 msgid "Я студент"
 msgstr "I am a student"
@@ -78,3 +129,9 @@ msgstr "I am a teacher / staff member"
 
 msgid "Вход ещё не настроен."
 msgstr "Sign-in is not configured yet."
+
+msgid "сегодня"
+msgstr "today"
+
+msgid "Пар нет."
+msgstr "No classes."

@@ -110,3 +110,7 @@ OIDC = {
 GAUDI_API_URL = env("GAUDI_API_URL", "")
 GAUDI_API_KEY = env("GAUDI_API_KEY", "")
 API_TIMEOUT = float(env("API_TIMEOUT", "5"))
+
+# Расписание: пары группы (ключ API расписания)
+SCHEDULE_API_URL = env("SCHEDULE_API_URL", "")
+SCHEDULE_API_KEY = env("SCHEDULE_API_KEY", "")

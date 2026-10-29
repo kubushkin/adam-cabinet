@@ -11,10 +11,12 @@ from authlib.integrations.base_client import OAuthError
 from django.http import Http404
 from django.shortcuts import redirect, render
 from django.urls import reverse
+from django.utils import timezone
+from django.utils.dates import WEEKDAYS
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
-from . import gaudi, oidc
+from . import gaudi, oidc, schedule
 
 
 def who_context(request):
@@ -83,12 +85,46 @@ def logout(request):
     return redirect(end + "?" + urlencode(params))
 
 
-@login_required
-def home(request):
+def _profile_and_lessons(request):
+    """Профиль из Гауди и пары группы студента. Ошибки — текстом, страница всё равно открывается."""
     who = request.session["who"]
-    context = {"profile": None, "error": None}
+    context = {"profile": None, "lessons": None, "errors": []}
     try:
         context["profile"] = gaudi.profile(who["kind"], who["id"])
     except gaudi.GaudiError as exc:
-        context["error"] = str(exc)
+        context["errors"].append(str(exc))
+        return context
+    group = context["profile"]["holder"].get("group")
+    if who["kind"] == "student" and group:
+        try:
+            context["lessons"] = schedule.group_lessons(group)
+        except schedule.ScheduleError as exc:
+            context["errors"].append(str(exc))
+    return context
+
+
+@login_required
+def home(request):
+    """Сегодня: профиль и пары дня (текущая подсвечена, следующая отмечена)."""
+    context = _profile_and_lessons(request)
+    now = timezone.localtime()
+    day = now.isoweekday()
+    context.update(today=now.date(), weekday=WEEKDAYS[day - 1])
+    if context["lessons"] is not None:
+        context["today_lessons"] = schedule.mark_today([x for x in context["lessons"] if x["weekday"] == day], now)
     return render(request, "cabinet/home.html", context)
+
+
+@login_required
+def week(request):
+    """Расписание на неделю: понедельник–суббота, сегодняшний день отмечен."""
+    context = _profile_and_lessons(request)
+    now = timezone.localtime()
+    if context["lessons"] is not None:
+        context["days"] = []
+        for n in range(1, 7):
+            lessons = sorted((x for x in context["lessons"] if x["weekday"] == n), key=lambda x: x["start"])
+            if n == now.isoweekday():
+                lessons = schedule.mark_today(lessons, now)  # «идёт» и «следующая» — только сегодня
+            context["days"].append({"title": WEEKDAYS[n - 1], "today": n == now.isoweekday(), "lessons": lessons})
+    return render(request, "cabinet/week.html", context)
