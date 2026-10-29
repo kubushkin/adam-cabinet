@@ -1,0 +1,80 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-29 13:20+0600\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+msgid "Связь с Гауди не настроена."
+msgstr "Connection to Gaudi is not configured."
+
+msgid "Гауди сейчас не отвечает. Попробуйте позже."
+msgstr "Gaudi is not responding right now. Please try again later."
+
+msgid "Вас нет в Гауди. Обратитесь в учебный отдел."
+msgstr "You are not found in Gaudi. Please contact the academic office."
+
+#, python-format
+msgid "Гауди ответил ошибкой %(code)s."
+msgstr "Gaudi returned error %(code)s."
+
+msgid "Вход не завершён. Попробуйте ещё раз."
+msgstr "Sign-in was not completed. Please try again."
+
+#, python-format
+msgid "Логин %(login)s не похож на ID в Гауди. Обратитесь в ИО."
+msgstr "Login %(login)s does not look like a Gaudi ID. Please contact the IT department."
+
+msgid "Русский"
+msgstr "Russian"
+
+msgid "Кыргызча"
+msgstr "Kyrgyz"
+
+msgid "English"
+msgstr "English"
+
+msgid "Личный кабинет"
+msgstr "Personal account"
+
+msgid "Выйти"
+msgstr "Sign out"
+
+msgid "Студент"
+msgstr "Student"
+
+#, python-format
+msgid "%(course)s курс"
+msgstr "Year %(course)s"
+
+msgid "Сотрудник"
+msgstr "Staff"
+
+msgid "Вход"
+msgstr "Sign in"
+
+msgid "Вход в личный кабинет"
+msgstr "Sign in to your account"
+
+msgid "Логин — ваш ID в университете, пароль — как в Moodle и Mattermost."
+msgstr "Login is your university ID; the password is the same as in Moodle and Mattermost."
+
+msgid "Я студент"
+msgstr "I am a student"
+
+msgid "Я преподаватель / сотрудник"
+msgstr "I am a teacher / staff member"
+
+msgid "Вход ещё не настроен."
+msgstr "Sign-in is not configured yet."

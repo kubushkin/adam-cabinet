@@ -1,0 +1,6 @@
+Authlib==1.8.0
+Django==5.2.18
+gunicorn==23.0.0
+psycopg[binary]==3.2.9
+requests==2.32.3
+whitenoise==6.9.0

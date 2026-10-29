@@ -1,0 +1,33 @@
+# Личный кабинет Adam University: база PostgreSQL (сессии входа) + веб.
+# Запуск: cp .env.example .env (заполнить) && docker compose up -d --build
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-cabinet}
+      POSTGRES_USER: ${DB_USER:-cabinet}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?задайте DB_PASSWORD в .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  web:
+    build: .
+    image: adam-cabinet:latest
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DB_HOST: db
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "${CABINET_PORT:-8102}:8000"
+
+volumes:
+  pgdata:

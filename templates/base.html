@@ -1,0 +1,25 @@
+{% load static i18n %}<!DOCTYPE html>
+{% get_current_language as LANG %}
+<html lang="{{ LANG }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}{% translate "Личный кабинет" %}{% endblock %} · Adam University</title>
+<link rel="stylesheet" href="{% static 'cabinet.css' %}">
+</head>
+<body>
+<header class="top"><div class="in">
+  <a class="brand" href="{% url 'home' %}">ADAM UNIVERSITY<span>{% translate "Личный кабинет" %}</span></a>
+  <div class="tools">
+    {# язык — кнопками, без скриптов #}
+    <form class="langs" method="post" action="{% url 'set_language' %}">{% csrf_token %}
+      <input type="hidden" name="next" value="{{ request.get_full_path }}">
+      {% get_available_languages as langs %}
+      {% for code, name in langs %}<button type="submit" name="language" value="{{ code }}"{% if code == LANG %} class="on" aria-current="true"{% endif %} title="{{ name }}">{{ code|upper }}</button>{% endfor %}
+    </form>
+    {% if who %}<form method="post" action="{% url 'logout' %}">{% csrf_token %}<button type="submit" class="out">{% translate "Выйти" %}</button></form>{% endif %}
+  </div>
+</div></header>
+<main>{% block content %}{% endblock %}</main>
+</body>
+</html>

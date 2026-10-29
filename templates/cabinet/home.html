@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+{% if error %}<div class="msg error">{{ error }}</div>{% endif %}
+{% if profile %}{% with h=profile.holder %}
+<section class="card who">
+  {% if h.photo_url %}<img class="photo" src="{{ h.photo_url }}" alt="">{% else %}<div class="photo" aria-hidden="true">{{ h.full_name|slice:":1" }}</div>{% endif %}
+  <div>
+    <h1>{{ h.full_name }}</h1>
+    {% if h.type == "student" %}
+      <p class="muted">{% translate "Студент" %} · {{ h.group|default:"—" }} · {% blocktranslate with course=h.course %}{{ course }} курс{% endblocktranslate %}</p>
+    {% else %}
+      <p class="muted">{{ h.position|default:_("Сотрудник") }}</p>
+    {% endif %}
+    {% if h.department %}<p class="muted">{{ h.department }}</p>{% endif %}
+    <p><span class="tag {% if h.active %}ok{% else %}bad{% endif %}">{{ h.state }}</span> <span class="muted">ID {{ h.id }}</span></p>
+  </div>
+</section>
+{% endwith %}{% endif %}
+{% endblock %}

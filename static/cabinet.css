@@ -1,0 +1,39 @@
+/* Личный кабинет Adam University — сначала телефон. Одна таблица стилей, без внешних библиотек. */
+:root {
+  --navy: #16253D; --ink: #15233A; --muted: #5B6573; --line: #DCE1E8; --bg: #EEF1F5; --card: #fff;
+  --accent: #D9822B; --ok: #2E6B45; --ok-bg: #E2F1E7; --bad: #B3261E; --bad-bg: #FBE3E1; --info: #2E5C9C;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+a { color: var(--info); }
+header.top { background: var(--navy); color: #fff; }
+header.top .in { max-width: 960px; margin: 0 auto; padding: 10px 16px; display: flex; gap: 12px; align-items: center;
+  justify-content: space-between; flex-wrap: wrap; }
+.brand { color: #fff; text-decoration: none; font-weight: 700; letter-spacing: .06em; font-size: 14px; display: flex; flex-direction: column; }
+.brand span { font-weight: 500; letter-spacing: 0; opacity: .75; font-size: 12px; }
+.tools { display: flex; gap: 10px; align-items: center; }
+.tools form { margin: 0; }
+.langs { display: flex; gap: 2px; }
+.langs button, .out { font: inherit; font-size: 13px; color: #fff; background: none; border: 1px solid transparent; border-radius: 8px;
+  padding: 6px 8px; cursor: pointer; }
+.langs button.on { border-color: rgba(255,255,255,.5); }
+.out { text-decoration: underline; }
+main { max-width: 960px; margin: 0 auto; padding: 16px 16px 48px; display: flex; flex-direction: column; gap: 14px; }
+h1 { font-size: 22px; margin: 0; line-height: 1.25; }
+p { margin: 0; }
+.muted { color: var(--muted); font-size: 14px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+.login { max-width: 440px; margin: 8vh auto 0; width: 100%; }
+.btn { display: block; text-align: center; font-weight: 600; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--line);
+  background: #fff; color: var(--ink); text-decoration: none; }
+.btn.primary { background: var(--navy); border-color: var(--navy); color: #fff; }
+.btn:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.msg { border-radius: 12px; padding: 10px 14px; font-weight: 600; }
+.msg.error { background: var(--bad-bg); color: var(--bad); }
+.who { flex-direction: row; align-items: center; gap: 16px; }
+.photo { width: 84px; height: 104px; border-radius: 12px; object-fit: cover; flex: none; background: #E2EBF7; color: var(--info);
+  display: grid; place-items: center; font-size: 30px; font-weight: 700; }
+.who > div { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.tag { display: inline-block; font-size: 12px; font-weight: 700; padding: 2px 9px; border-radius: 999px; }
+.tag.ok { background: var(--ok-bg); color: var(--ok); }
+.tag.bad { background: var(--bad-bg); color: var(--bad); }

@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: cabinet
+          POSTGRES_USER: cabinet
+          POSTGRES_PASSWORD: cabinet
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U cabinet" --health-interval 5s --health-timeout 3s --health-retries 20
+    env:
+      DJANGO_SECRET_KEY: ci-only
+      DB_HOST: 127.0.0.1
+      DB_NAME: cabinet
+      DB_USER: cabinet
+      DB_PASSWORD: cabinet
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Миграции соответствуют моделям
+        run: python manage.py makemigrations --check --dry-run
+      - name: Тесты
+        run: python manage.py test --noinput
+      - name: Статика собирается (как в образе)
+        run: python manage.py collectstatic --noinput
+
+  docker:
+    # Собираем образ и поднимаем все контейнеры так же, как на ВМ: docker compose up -d --build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: .env как на ВМ
+        run: |
+          cp .env.example .env
+          sed -i "s|^DJANGO_SECRET_KEY=.*|DJANGO_SECRET_KEY=$(openssl rand -hex 32)|; s|^DB_PASSWORD=.*|DB_PASSWORD=$(openssl rand -hex 16)|" .env
+      - name: Сборка и запуск
+        run: docker compose up -d --build
+      - name: Сайт отвечает, миграции применены
+        run: |
+          for i in $(seq 1 40); do curl -fsS -o /dev/null http://localhost:8102/login/ && break; sleep 3; done
+          curl -fsS http://localhost:8102/login/ | grep -q "Вход в личный кабинет"
+          curl -fsS -o /dev/null -w "статика %{http_code}\n" "http://localhost:8102$(curl -fsS http://localhost:8102/login/ | grep -o '/static/cabinet[^"]*')"
+          docker compose exec -T web python manage.py migrate --check
+          docker compose ps
+          test "$(docker compose ps --status running -q | wc -l)" = 2
+      - name: Логи
+        if: always()
+        run: docker compose logs --no-color --tail 80

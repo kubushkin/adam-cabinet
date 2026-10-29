@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Вход" %}{% endblock %}
+{% block content %}
+<section class="card login">
+  <h1>{% translate "Вход в личный кабинет" %}</h1>
+  <p class="muted">{% translate "Логин — ваш ID в университете, пароль — как в Moodle и Mattermost." %}</p>
+  {% if error %}<div class="msg error">{{ error }}</div>{% endif %}
+  {% for kind in kinds %}
+    <a class="btn {% if forloop.first %}primary{% endif %}" href="{% url 'login-start' kind %}">
+      {% if kind == "student" %}{% translate "Я студент" %}{% else %}{% translate "Я преподаватель / сотрудник" %}{% endif %}
+    </a>
+  {% empty %}
+    <div class="msg error">{% translate "Вход ещё не настроен." %}</div>
+  {% endfor %}
+</section>
+{% endblock %}
