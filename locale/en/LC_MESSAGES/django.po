@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-29 14:08+0600\n"
+"POT-Creation-Date: 2026-10-29 15:15+0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,121 +17,201 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+#: cabinet/gaudi.py:17
 msgid "Связь с Гауди не настроена."
 msgstr "Connection to Gaudi is not configured."
 
+#: cabinet/gaudi.py:23
 msgid "Гауди сейчас не отвечает. Попробуйте позже."
 msgstr "Gaudi is not responding right now. Please try again later."
 
+#: cabinet/gaudi.py:25
 msgid "Вас нет в Гауди. Обратитесь в учебный отдел."
 msgstr "You are not found in Gaudi. Please contact the academic office."
 
+#: cabinet/gaudi.py:27
 #, python-format
 msgid "Гауди ответил ошибкой %(code)s."
 msgstr "Gaudi returned error %(code)s."
 
+#: cabinet/schedule.py:25
 msgid "Связь с расписанием не настроена."
 msgstr "Connection to Gaudi is not configured."
 
+#: cabinet/schedule.py:36
 msgid "Расписание сейчас не отвечает. Попробуйте позже."
 msgstr "Gaudi is not responding right now. Please try again later."
 
+#: cabinet/schedule.py:40
 #, python-format
 msgid "Расписание ответило ошибкой %(code)s."
 msgstr "Gaudi returned error %(code)s."
 
+#: cabinet/views.py:59
 msgid "Вход не завершён. Попробуйте ещё раз."
 msgstr "Sign-in was not completed. Please try again."
 
+#: cabinet/views.py:64
 #, python-format
 msgid "Логин %(login)s не похож на ID в Гауди. Обратитесь в ИО."
-msgstr "Login %(login)s does not look like a Gaudi ID. Please contact the IT department."
+msgstr ""
 "Login %(login)s does not look like a Gaudi ID. Please contact the IT "
-"department."
+"department.Login %(login)s does not look like a Gaudi ID. Please contact the"
+" IT department."
 
+#: config/settings.py:76
 msgid "Русский"
 msgstr "Russian"
 
+#: config/settings.py:76
 msgid "Кыргызча"
 msgstr "Kyrgyz"
 
+#: config/settings.py:76
 msgid "English"
 msgstr "English"
 
+#: templates/base.html:7 templates/base.html:12
 msgid "Личный кабинет"
 msgstr "Personal account"
 
+#: templates/base.html:20
 msgid "Выйти"
 msgstr "Sign out"
 
+#: templates/base.html:24
 msgid "Разделы"
 msgstr "Sections"
 
+#: templates/base.html:26 templates/cabinet/home.html:3
+#: templates/cabinet/home.html:22
 msgid "Сегодня"
 msgstr "Today"
 
+#: templates/base.html:27 templates/cabinet/week.html:3
+#: templates/cabinet/week.html:7
 msgid "Расписание"
 msgstr "Timetable"
 
+#: templates/base.html:28 templates/cabinet/study.html:3
+#: templates/cabinet/study.html:6
+msgid "Учёба"
+msgstr "Studies"
+
+#: templates/cabinet/_lesson.html:5
 msgid "Сейчас"
 msgstr "Now"
 
+#: templates/cabinet/_lesson.html:5
 msgid "Следующая"
 msgstr "Next"
 
+#: templates/cabinet/_lesson.html:8
 msgid "ауд."
 msgstr "room"
 
+#: templates/cabinet/_lesson.html:8
 #, python-format
 msgid "корпус %(n)s"
 msgstr "building %(n)s"
 
+#: templates/cabinet/_lesson.html:9
 msgid "Ссылка на занятие"
 msgstr "Class link"
 
+#: templates/cabinet/home.html:12
 msgid "Студент"
 msgstr "Student"
 
+#: templates/cabinet/home.html:12
 #, python-format
 msgid "%(course)s курс"
 msgstr "Year %(course)s"
 
+#: templates/cabinet/home.html:14
 msgid "Сотрудник"
 msgstr "Staff"
 
+#: templates/cabinet/home.html:26
 msgid "Сегодня пар нет."
 msgstr "No classes today."
 
+#: templates/cabinet/home.html:28
 msgid "Расписание на неделю"
 msgstr "Weekly timetable"
 
+#: templates/cabinet/home.html:31 templates/cabinet/week.html:18
 msgid ""
 "Ваши пары из расписания появятся здесь, когда учебный отдел сопоставит "
 "преподавателей с расписанием."
 msgstr ""
+"Your classes will appear here once the academic office matches teachers with"
+" the timetable."
 
+#: templates/cabinet/login.html:3
 msgid "Вход"
 msgstr "Sign in"
 
+#: templates/cabinet/login.html:6
 msgid "Вход в личный кабинет"
 msgstr "Sign in to your account"
 
+#: templates/cabinet/login.html:7
 msgid "Логин — ваш ID в университете, пароль — как в Moodle и Mattermost."
-msgstr "Login is your university ID; the password is the same as in Moodle and Mattermost."
+msgstr ""
 "Login is your university ID; the password is the same as in Moodle and "
-"Mattermost."
+"Mattermost.Login is your university ID; the password is the same as in "
+"Moodle and Mattermost."
 
+#: templates/cabinet/login.html:11
 msgid "Я студент"
 msgstr "I am a student"
 
+#: templates/cabinet/login.html:11
 msgid "Я преподаватель / сотрудник"
 msgstr "I am a teacher / staff member"
 
+#: templates/cabinet/login.html:14
 msgid "Вход ещё не настроен."
 msgstr "Sign-in is not configured yet."
 
+#: templates/cabinet/study.html:10
+#, python-format
+msgid "%(n)s семестр"
+msgstr "Semester %(n)s"
+
+#: templates/cabinet/study.html:15
+msgid "кредиты"
+msgstr "credits"
+
+#: templates/cabinet/study.html:16
+msgid "М1"
+msgstr "M1"
+
+#: templates/cabinet/study.html:16
+msgid "М2"
+msgstr "M2"
+
+#: templates/cabinet/study.html:16
+msgid "экз."
+msgstr "exam"
+
+#: templates/cabinet/study.html:16
+msgid "доп."
+msgstr "extra"
+
+#: templates/cabinet/study.html:23
+msgid "Оценок пока нет."
+msgstr "No grades yet."
+
+#: templates/cabinet/study.html:26
+msgid "Этот раздел — для студентов."
+msgstr "This section is for students."
+
+#: templates/cabinet/week.html:11
 msgid "сегодня"
 msgstr "today"
 
+#: templates/cabinet/week.html:14
 msgid "Пар нет."
 msgstr "No classes."

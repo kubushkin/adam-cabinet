@@ -25,6 +25,7 @@
   {% with name=request.resolver_match.url_name %}
   <a href="{% url 'home' %}"{% if name == 'home' %} class="on" aria-current="page"{% endif %}>{% translate "Сегодня" %}</a>
   <a href="{% url 'week' %}"{% if name == 'week' %} class="on" aria-current="page"{% endif %}>{% translate "Расписание" %}</a>
+  <a href="{% url 'study' %}"{% if name == 'study' %} class="on" aria-current="page"{% endif %}>{% translate "Учёба" %}</a>
   {% endwith %}
 </div></nav>
 {% endif %}

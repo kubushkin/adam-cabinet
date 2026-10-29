@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-29 14:08+0600\n"
+"POT-Creation-Date: 2026-10-29 15:15+0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,119 +17,201 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
+#: cabinet/gaudi.py:17
 msgid "Связь с Гауди не настроена."
 msgstr "Гауди менен байланыш жөндөлгөн эмес."
 
+#: cabinet/gaudi.py:23
 msgid "Гауди сейчас не отвечает. Попробуйте позже."
 msgstr "Гауди азыр жооп бербей жатат. Кийинчерээк аракет кылыңыз."
 
+#: cabinet/gaudi.py:25
 msgid "Вас нет в Гауди. Обратитесь в учебный отдел."
 msgstr "Сиз Гаудиде жоксуз. Окуу бөлүмүнө кайрылыңыз."
 
+#: cabinet/gaudi.py:27
 #, python-format
 msgid "Гауди ответил ошибкой %(code)s."
 msgstr "Гауди %(code)s катасы менен жооп берди."
 
+#: cabinet/schedule.py:25
 msgid "Связь с расписанием не настроена."
 msgstr "Гауди менен байланыш жөндөлгөн эмес."
 
+#: cabinet/schedule.py:36
 msgid "Расписание сейчас не отвечает. Попробуйте позже."
 msgstr "Гауди азыр жооп бербей жатат. Кийинчерээк аракет кылыңыз."
 
+#: cabinet/schedule.py:40
 #, python-format
 msgid "Расписание ответило ошибкой %(code)s."
 msgstr "Гауди %(code)s катасы менен жооп берди."
 
+#: cabinet/views.py:59
 msgid "Вход не завершён. Попробуйте ещё раз."
 msgstr "Кирүү аяктаган жок. Кайра аракет кылыңыз."
 
+#: cabinet/views.py:64
 #, python-format
 msgid "Логин %(login)s не похож на ID в Гауди. Обратитесь в ИО."
-msgstr "%(login)s логини Гаудидеги ID'ге окшобойт. Маалымат бөлүмүнө кайрылыңыз."
-"%(login)s логини Гаудидеги ID'ге окшобойт. Маалымат бөлүмүнө кайрылыңыз."
+msgstr ""
+"%(login)s логини Гаудидеги ID'ге окшобойт. Маалымат бөлүмүнө "
+"кайрылыңыз.%(login)s логини Гаудидеги ID'ге окшобойт. Маалымат бөлүмүнө "
+"кайрылыңыз."
 
+#: config/settings.py:76
 msgid "Русский"
 msgstr "Орусча"
 
+#: config/settings.py:76
 msgid "Кыргызча"
 msgstr "Кыргызча"
 
+#: config/settings.py:76
 msgid "English"
 msgstr "Англисче"
 
+#: templates/base.html:7 templates/base.html:12
 msgid "Личный кабинет"
 msgstr "Жеке кабинет"
 
+#: templates/base.html:20
 msgid "Выйти"
 msgstr "Чыгуу"
 
+#: templates/base.html:24
 msgid "Разделы"
 msgstr "Бөлүмдөр"
 
+#: templates/base.html:26 templates/cabinet/home.html:3
+#: templates/cabinet/home.html:22
 msgid "Сегодня"
 msgstr "Бүгүн"
 
+#: templates/base.html:27 templates/cabinet/week.html:3
+#: templates/cabinet/week.html:7
 msgid "Расписание"
 msgstr "Сабак жадыбалы"
 
+#: templates/base.html:28 templates/cabinet/study.html:3
+#: templates/cabinet/study.html:6
+msgid "Учёба"
+msgstr "Окуу"
+
+#: templates/cabinet/_lesson.html:5
 msgid "Сейчас"
 msgstr "Азыр"
 
+#: templates/cabinet/_lesson.html:5
 msgid "Следующая"
 msgstr "Кийинки"
 
+#: templates/cabinet/_lesson.html:8
 msgid "ауд."
 msgstr "ауд."
 
+#: templates/cabinet/_lesson.html:8
 #, python-format
 msgid "корпус %(n)s"
 msgstr "%(n)s-корпус"
 
+#: templates/cabinet/_lesson.html:9
 msgid "Ссылка на занятие"
 msgstr "Сабакка шилтеме"
 
+#: templates/cabinet/home.html:12
 msgid "Студент"
 msgstr "Студент"
 
+#: templates/cabinet/home.html:12
 #, python-format
 msgid "%(course)s курс"
 msgstr "%(course)s-курс"
 
+#: templates/cabinet/home.html:14
 msgid "Сотрудник"
 msgstr "Кызматкер"
 
+#: templates/cabinet/home.html:26
 msgid "Сегодня пар нет."
 msgstr "Бүгүн сабак жок."
 
+#: templates/cabinet/home.html:28
 msgid "Расписание на неделю"
 msgstr "Жумалык сабак жадыбалы"
 
+#: templates/cabinet/home.html:31 templates/cabinet/week.html:18
 msgid ""
 "Ваши пары из расписания появятся здесь, когда учебный отдел сопоставит "
 "преподавателей с расписанием."
 msgstr ""
+"Учебный бөлүм окутуучуларды расписание менен дал келтиргенден кийин, "
+"сабактарыңыз ушул жерде көрүнөт."
 
+#: templates/cabinet/login.html:3
 msgid "Вход"
 msgstr "Кирүү"
 
+#: templates/cabinet/login.html:6
 msgid "Вход в личный кабинет"
 msgstr "Жеке кабинетке кирүү"
 
+#: templates/cabinet/login.html:7
 msgid "Логин — ваш ID в университете, пароль — как в Moodle и Mattermost."
-msgstr "Логин — университеттеги ID'ңиз, сырсөз — Moodle жана Mattermost'тогудай."
-"Логин — университеттеги ID'ңиз, сырсөз — Moodle жана Mattermost'тогудай."
+msgstr ""
+"Логин — университеттеги ID'ңиз, сырсөз — Moodle жана "
+"Mattermost'тогудай.Логин — университеттеги ID'ңиз, сырсөз — Moodle жана "
+"Mattermost'тогудай."
 
+#: templates/cabinet/login.html:11
 msgid "Я студент"
 msgstr "Мен студентмин"
 
+#: templates/cabinet/login.html:11
 msgid "Я преподаватель / сотрудник"
 msgstr "Мен окутуучумун / кызматкермин"
 
+#: templates/cabinet/login.html:14
 msgid "Вход ещё не настроен."
 msgstr "Кирүү азырынча жөндөлгөн эмес."
 
+#: templates/cabinet/study.html:10
+#, python-format
+msgid "%(n)s семестр"
+msgstr "%(n)s-семестр"
+
+#: templates/cabinet/study.html:15
+msgid "кредиты"
+msgstr "кредиттер"
+
+#: templates/cabinet/study.html:16
+msgid "М1"
+msgstr "М1"
+
+#: templates/cabinet/study.html:16
+msgid "М2"
+msgstr "М2"
+
+#: templates/cabinet/study.html:16
+msgid "экз."
+msgstr "экз."
+
+#: templates/cabinet/study.html:16
+msgid "доп."
+msgstr "кош."
+
+#: templates/cabinet/study.html:23
+msgid "Оценок пока нет."
+msgstr "Азырынча баалар жок."
+
+#: templates/cabinet/study.html:26
+msgid "Этот раздел — для студентов."
+msgstr "Бул бөлүм студенттер үчүн."
+
+#: templates/cabinet/week.html:11
 msgid "сегодня"
 msgstr "бүгүн"
 
+#: templates/cabinet/week.html:14
 msgid "Пар нет."
 msgstr "Сабак жок."

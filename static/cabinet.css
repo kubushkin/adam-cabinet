@@ -54,3 +54,10 @@ nav.tabs a.on { color: var(--ink); border-bottom-color: var(--navy); }
 .tag.now { background: var(--navy); color: #fff; align-self: flex-start; }
 .tag.next { background: #E2EBF7; color: var(--info); align-self: flex-start; }
 .day.today { border-color: var(--navy); }
+.marks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.marks li { display: flex; gap: 12px; justify-content: space-between; padding: 10px 0; border-top: 1px solid var(--line); }
+.marks li:first-child { border-top: 0; padding-top: 0; }
+.marks .what { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.marks .score { display: flex; flex-direction: column; align-items: flex-end; flex: none; text-align: right; font-variant-numeric: tabular-nums; }
+.marks .score b { font-size: 18px; }
+.marks .score span { color: var(--muted); font-size: 13px; }

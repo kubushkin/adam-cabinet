@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Учёба" %}{% endblock %}
+{% block content %}
+{% for error in errors %}<div class="msg error">{{ error }}</div>{% endfor %}
+<h1>{% translate "Учёба" %}{% if transcript.gpa is not None %} · GPA {{ transcript.gpa }}{% endif %}</h1>
+{% if transcript %}
+  {% for sem in transcript.semesters reversed %}
+  <section class="card">
+    <h2>{% blocktranslate with n=sem.semestr %}{{ n }} семестр{% endblocktranslate %}{% if sem.gpa is not None %} <span class="muted">· GPA {{ sem.gpa }}</span>{% endif %}</h2>
+    <ul class="marks">{% for item in sem.items %}
+      <li>
+        <div class="what">
+          <b>{{ item.name }}</b>
+          <span class="muted">{% translate "кредиты" %}: {{ item.credits|floatformat:"-1" }} · {{ item.control }}</span>
+          <span class="muted">{% translate "М1" %} {{ item.first_module }} · {% translate "М2" %} {{ item.second_module }} · {% translate "экз." %} {{ item.exam }}{% if item.additional %} · {% translate "доп." %} {{ item.additional }}{% endif %}</span>
+        </div>
+        <div class="score"><b>{{ item.points|floatformat:"-1" }}</b><span>{% if item.letter %}{{ item.letter }} · {% endif %}{{ item.mark }}</span></div>
+      </li>
+    {% endfor %}</ul>
+  </section>
+  {% empty %}
+  <section class="card"><p class="muted">{% translate "Оценок пока нет." %}</p></section>
+  {% endfor %}
+{% elif not errors %}
+  <section class="card"><p class="muted">{% translate "Этот раздел — для студентов." %}</p></section>
+{% endif %}
+{% endblock %}

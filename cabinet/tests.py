@@ -193,3 +193,62 @@ class ScheduleTestCase(TestCase):
             self.client.get("/auth/student/callback/")        # вошёл другой человек в том же браузере
         self.client.get("/")
         self.assertEqual(self.gaudi_calls, 3)                 # профиль прежнего не показываем
+
+
+TRANSCRIPT = {"student_id": 20231001, "gpa": 3.5, "semesters": [
+    {"semestr": 1, "gpa": 3.5, "items": [
+        {"code": 11, "name": "Программирование", "hours": 150.0, "credits": 5.0, "control": "Экзамен",
+         "first_module": 28, "second_module": 27, "exam": 35, "additional": 0, "points": 90.0,
+         "mark": "Отлично", "letter": "A-", "gpa": 3.67},
+        {"code": 12, "name": "История Кыргызстана", "hours": 90.0, "credits": 3.0, "control": "Зачёт",
+         "first_module": 20, "second_module": 22, "exam": 30, "additional": 5, "points": 77.0,
+         "mark": "Хорошо", "letter": "B", "gpa": 3.33}]},
+    {"semestr": 2, "gpa": None, "items": [
+        {"code": 13, "name": "Базы данных", "hours": 150.0, "credits": 5.0, "control": "Экзамен",
+         "first_module": 25, "second_module": 0, "exam": 0, "additional": 0, "points": 25.0,
+         "mark": "", "letter": None, "gpa": None}]},
+]}
+
+
+@override_settings(OIDC=OIDC, GAUDI_API_URL="http://gaudi.test", GAUDI_API_KEY="k.k")
+class StudyTestCase(TestCase):
+    """Учёба: оценки по семестрам из транскрипта Гауди."""
+
+    def setUp(self):
+        with mock.patch("cabinet.oidc.client", return_value=FakeClient(token())):
+            self.client.get("/auth/student/callback/")
+
+    @mock.patch("requests.get", return_value=fake_response(200, TRANSCRIPT))
+    def test_semesters_and_gpa(self, get):
+        page = self.client.get("/study/").content.decode()
+        self.assertEqual(get.call_args.args[0], "http://gaudi.test/api/cabinet/student/20231001/transcript/")
+        self.assertEqual(get.call_args.kwargs["params"], {"lang": "ru"})
+        self.assertIn("GPA 3,5", page)                        # по-русски — с запятой
+        self.assertIn("Программирование", page)
+        self.assertIn("A- · Отлично", page)
+        self.assertIn("доп. 5", page)                          # дополнительные баллы — только если есть
+        self.assertLess(page.index("2 семестр"), page.index("1 семестр"))  # свежий семестр сверху
+
+    @mock.patch("requests.get", return_value=fake_response(200, TRANSCRIPT))
+    def test_kept_in_session_per_language(self, get):
+        self.client.get("/study/")
+        self.client.get("/study/")
+        self.assertEqual(get.call_count, 1)
+        self.client.post("/i18n/setlang/", {"language": "en", "next": "/study/"})
+        self.client.get("/study/")
+        self.assertEqual(get.call_count, 2)                   # другой язык — названия дисциплин заново
+        self.assertEqual(get.call_args.kwargs["params"], {"lang": "en"})
+
+    @mock.patch("requests.get", return_value=fake_response(500))
+    def test_gaudi_error_is_shown(self, get):
+        page = self.client.get("/study/").content.decode()
+        self.assertIn("Гауди ответил ошибкой 500", page)
+
+    @mock.patch("requests.get")
+    def test_staff_has_no_transcript(self, get):
+        session = self.client.session
+        session["who"] = {"kind": "staff", "id": 5, "name": "Преподаватель"}
+        session.save()
+        page = self.client.get("/study/").content.decode()
+        self.assertIn("Этот раздел — для студентов.", page)
+        get.assert_not_called()

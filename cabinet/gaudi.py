@@ -31,3 +31,8 @@ def _get(path, params=None):
 def profile(kind, person_id):
     """{"holder": {...}, "card": {"url", "issued_at"} | None}"""
     return _get("/api/cabinet/%s/%s/" % (kind, person_id))
+
+
+def transcript(student_id, lang):
+    """{"gpa", "semesters": [{"semestr", "gpa", "items": [{name, credits, control, first_module, …, points, mark, letter}]}]}"""
+    return _get("/api/cabinet/student/%s/transcript/" % student_id, {"lang": lang})

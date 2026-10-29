@@ -2,7 +2,7 @@
 Вход и выход через Keycloak, главная страница кабинета.
 
 В сессии хранится «кто вошёл»: {"kind": "student"|"staff", "id": ID в Гауди, "name": …},
-id_token (нужен Keycloak при выходе) и профиль из Гауди на PROFILE_SECONDS — Гауди отвечает около секунды,
+id_token (нужен Keycloak при выходе) и ответы Гауди (профиль, оценки) на PROFILE_SECONDS — Гауди отвечает около секунды,
 и без этого чувствовалась задержка при каждом переключении вкладок.
 """
 import time
@@ -15,7 +15,7 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.dates import WEEKDAYS
-from django.utils.translation import gettext as _
+from django.utils.translation import get_language, gettext as _
 from django.views.decorators.http import require_POST
 
 from . import gaudi, oidc, schedule
@@ -62,10 +62,9 @@ def login_callback(request, kind):
     if not login.isdigit():
         # логин в Keycloak должен быть ID в Гауди — иначе непонятно, чьи данные показывать
         return login_page(request, _("Логин %(login)s не похож на ID в Гауди. Обратитесь в ИО.") % {"login": login})
-    request.session.cycle_key()  # новая сессия после входа
+    request.session.flush()  # новая пустая сессия после входа: ничего от прежнего пользователя
     request.session["who"] = {"kind": kind, "id": int(login), "name": info.get("name") or login}
     request.session["id_token"] = token.get("id_token", "")
-    request.session.pop("profile", None)  # cycle_key сохраняет данные сессии — чужой профиль не нужен
     return redirect("home")
 
 
@@ -90,14 +89,18 @@ def logout(request):
     return redirect(end + "?" + urlencode(params))
 
 
-def _profile(request, who):
-    """Профиль из Гауди; в сессии держим PROFILE_SECONDS."""
-    saved = request.session.get("profile")
+def _saved(request, name, fetch):
+    """Ответ Гауди из сессии, если ему меньше PROFILE_SECONDS; иначе — свежий (fetch) и запомнить."""
+    saved = request.session.get(name)
     if saved and time.time() - saved["at"] < PROFILE_SECONDS:
         return saved["data"]
-    data = gaudi.profile(who["kind"], who["id"])
-    request.session["profile"] = {"at": time.time(), "data": data}
+    data = fetch()
+    request.session[name] = {"at": time.time(), "data": data}
     return data
+
+
+def _profile(request, who):
+    return _saved(request, "profile", lambda: gaudi.profile(who["kind"], who["id"]))
 
 
 def _profile_and_lessons(request):
@@ -143,3 +146,17 @@ def week(request):
                 lessons = schedule.mark_today(lessons, now)  # «идёт» и «следующая» — только сегодня
             context["days"].append({"title": WEEKDAYS[n - 1], "today": n == now.isoweekday(), "lessons": lessons})
     return render(request, "cabinet/week.html", context)
+
+
+@login_required
+def study(request):
+    """Учёба: оценки по семестрам из Гауди (баллы модулей, итог, буква и GPA — как в транскрипте)."""
+    who = request.session["who"]
+    context = {"transcript": None, "errors": []}
+    if who["kind"] == "student":
+        try:
+            lang = get_language()
+            context["transcript"] = _saved(request, "transcript:" + lang, lambda: gaudi.transcript(who["id"], lang))
+        except gaudi.GaudiError as exc:
+            context["errors"].append(str(exc))
+    return render(request, "cabinet/study.html", context)
