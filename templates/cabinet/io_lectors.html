@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Преподаватели в расписании" %}{% endblock %}
+{% block content %}
+{% for error in errors %}<div class="msg error">{{ error }}</div>{% endfor %}
+<h1>{% translate "Преподаватели в расписании" %}</h1>
+<p class="muted">{% translate "Кабинет связывает преподавателя с расписанием сам — по ФИО при первом входе. Кого не нашёл, свяжите здесь: ID сотрудника в Гауди. Пустое поле — снять связь." %}</p>
+<section class="card">
+  <ul class="links">{% for row in rows %}
+    <li>
+      <div class="what">
+        <b>{{ row.lector.name }}</b>
+        {% if row.link %}<span class="muted">{{ row.link.staff_name }} · ID {{ row.link.staff_id }} · {% if row.link.auto %}{% translate "по ФИО" %}{% else %}{{ row.link.linked_by }}{% endif %}</span>
+        {% else %}<span class="tag bad">{% translate "не связан" %}</span>{% endif %}
+      </div>
+      <form method="post">{% csrf_token %}
+        <input type="hidden" name="lector" value="{{ row.lector.id }}">
+        <input name="staff" inputmode="numeric" pattern="[0-9]*" placeholder="{% translate "ID в Гауди" %}" value="{{ row.link.staff_id|default:"" }}" aria-label="{% translate "ID в Гауди" %}">
+        <button type="submit" class="btn small plain">{% translate "Сохранить" %}</button>
+      </form>
+    </li>
+  {% endfor %}</ul>
+</section>
+{% endblock %}

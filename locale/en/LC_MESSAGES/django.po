@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-29 15:49+0600\n"
+"POT-Creation-Date: 2026-10-29 16:23+0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -42,20 +42,20 @@ msgstr "Gaudi returned error %(code)s."
 msgid "Связь с расписанием не настроена."
 msgstr "Connection to Gaudi is not configured."
 
-#: cabinet/schedule.py:36
+#: cabinet/schedule.py:33
 msgid "Расписание сейчас не отвечает. Попробуйте позже."
 msgstr "Gaudi is not responding right now. Please try again later."
 
-#: cabinet/schedule.py:40
+#: cabinet/schedule.py:37
 #, python-format
 msgid "Расписание ответило ошибкой %(code)s."
 msgstr "Gaudi returned error %(code)s."
 
-#: cabinet/views.py:69
+#: cabinet/views.py:70
 msgid "Вход не завершён. Попробуйте ещё раз."
 msgstr "Sign-in was not completed. Please try again."
 
-#: cabinet/views.py:74
+#: cabinet/views.py:75
 #, python-format
 msgid "Логин %(login)s не похож на ID в Гауди. Обратитесь в ИО."
 msgstr ""
@@ -63,24 +63,43 @@ msgstr ""
 "department.Login %(login)s does not look like a Gaudi ID. Please contact the "
 "IT department."
 
-#: cabinet/views.py:217
+#: cabinet/views.py:236
 msgid "Запрос отправлен в учебный отдел. Лист выдадут после оплаты пересдачи."
 msgstr ""
 "Request sent to the academic office. The sheet is issued after the retake "
 "fee is paid."
 
-#: cabinet/views.py:219
+#: cabinet/views.py:238
 msgid "Не та строка."
 msgstr "Wrong row."
 
-#: cabinet/views.py:247
+#: cabinet/views.py:266
 msgid "Баллы — целые числа."
 msgstr "Points must be whole numbers."
 
-#: cabinet/views.py:251
+#: cabinet/views.py:270
 #, python-format
 msgid "Баллы по листу №%(n)s записаны в Гауди."
 msgstr "Points for sheet No. %(n)s saved to Gaudi."
+
+#: cabinet/views.py:301
+#, python-format
+msgid "Связь для «%(name)s» снята."
+msgstr "Link for “%(name)s” removed."
+
+#: cabinet/views.py:303
+msgid "ID сотрудника — только цифры."
+msgstr "Staff ID must be digits only."
+
+#: cabinet/views.py:308
+#, python-format
+msgid "Сотрудника с ID %(id)s нет в Гауди."
+msgstr "No staff member with ID %(id)s in Gaudi."
+
+#: cabinet/views.py:313
+#, python-format
+msgid "«%(lector)s» — это %(staff)s."
+msgstr "“%(lector)s” is %(staff)s."
 
 #: config/settings.py:76
 msgid "Русский"
@@ -107,7 +126,7 @@ msgid "Разделы"
 msgstr "Sections"
 
 #: templates/base.html:26 templates/cabinet/home.html:3
-#: templates/cabinet/home.html:34
+#: templates/cabinet/home.html:33
 msgid "Сегодня"
 msgstr "Today"
 
@@ -124,6 +143,10 @@ msgstr "Studies"
 #: templates/base.html:31
 msgid "Экз. листы"
 msgstr "Exam sheets"
+
+#: templates/base.html:32
+msgid "ИО"
+msgstr "IT"
 
 #: templates/cabinet/_lesson.html:5
 msgid "Сейчас"
@@ -218,21 +241,50 @@ msgstr "Waiting for your points: %(n)s."
 msgid "Открыть"
 msgstr "Open"
 
-#: templates/cabinet/home.html:38
+#: templates/cabinet/home.html:37
 msgid "Сегодня пар нет."
 msgstr "No classes today."
 
-#: templates/cabinet/home.html:40
+#: templates/cabinet/home.html:39 templates/cabinet/week.html:18
+msgid ""
+"Вас пока не нашли в расписании по ФИО. Информационный отдел свяжет вас с "
+"расписанием — тогда здесь появятся ваши пары."
+msgstr ""
+"We could not find you in the timetable by name yet. The IT department will "
+"link you — then your classes will appear here."
+
+#: templates/cabinet/home.html:41
 msgid "Расписание на неделю"
 msgstr "Weekly timetable"
 
-#: templates/cabinet/home.html:43 templates/cabinet/week.html:18
+#: templates/cabinet/io_lectors.html:3 templates/cabinet/io_lectors.html:6
+msgid "Преподаватели в расписании"
+msgstr "Teachers in the timetable"
+
+#: templates/cabinet/io_lectors.html:7
 msgid ""
-"Ваши пары из расписания появятся здесь, когда учебный отдел сопоставит "
-"преподавателей с расписанием."
+"Кабинет связывает преподавателя с расписанием сам — по ФИО при первом входе. "
+"Кого не нашёл, свяжите здесь: ID сотрудника в Гауди. Пустое поле — снять "
+"связь."
 msgstr ""
-"Your classes will appear here once the academic office matches teachers with "
-"the timetable."
+"The cabinet links teachers to the timetable by name at first sign-in. Link "
+"the ones it missed here: staff ID in Gaudi. Empty field removes the link."
+
+#: templates/cabinet/io_lectors.html:13
+msgid "по ФИО"
+msgstr "by name"
+
+#: templates/cabinet/io_lectors.html:14
+msgid "не связан"
+msgstr "not linked"
+
+#: templates/cabinet/io_lectors.html:18
+msgid "ID в Гауди"
+msgstr "Gaudi ID"
+
+#: templates/cabinet/io_lectors.html:19
+msgid "Сохранить"
+msgstr "Save"
 
 #: templates/cabinet/login.html:3
 msgid "Вход"

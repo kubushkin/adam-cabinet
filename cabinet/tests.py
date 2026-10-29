@@ -69,7 +69,7 @@ class LoginTestCase(TestCase):
     def test_login_and_profile(self, get):
         get.side_effect = lambda url, **kw: fake_response(200, {"sheets": []} if url.endswith("/exam-sheets/") else PROFILE)
         self.assertRedirects(self.login(FakeClient(token())), "/", fetch_redirect_response=False)
-        self.assertEqual(self.client.session["who"], {"kind": "student", "id": 20231001, "name": "Айпери Асанова"})
+        self.assertEqual(self.client.session["who"], {"kind": "student", "id": 20231001, "name": "Айпери Асанова", "roles": []})
         page = self.client.get("/").content.decode()
         self.assertIn("Асанова Айпери Бакытовна", page)
         self.assertIn("ИСТ-5-26", page)
@@ -369,3 +369,111 @@ class TeacherSheetsTestCase(TestCase):
         session.save()
         self.assertEqual(self.client.get("/sheets/").status_code, 404)
         self.assertEqual(self.client.post("/sheets/5/", {"exam": "1"}).status_code, 404)
+
+
+STAFF_PROFILE = {"holder": dict(PROFILE["holder"], type="staff", id=777, full_name="Абдыкадырова Мая Байсаловна",
+                                group=None, course=None, position="Доцент"), "card": None}
+LECTORS = {"lectors": [
+    {"id": 1, "name": "---", "regalia": None},
+    {"id": 4, "name": "Абдыкадырова Мая Байсаловна", "regalia": "к.п.н., доцент"},
+    {"id": 10, "name": "Байымова Ж.", "regalia": None},
+    {"id": 11, "name": "Аббас Кхан", "regalia": None},
+]}
+LECTOR_LESSONS = {"lessons": [
+    {"id": 7, "weekday": 3, "weekday_title": "Среда", "time": "10:00", "discipline": "Педагогика",
+     "lesson_type": "Лекция", "lector": {"id": 4, "name": "Абдыкадырова Мая Байсаловна", "regalia": None},
+     "group": {"id": 2, "title": "ПСИ-1-25"}, "classroom": "201", "campus": "1", "link": None, "notes": None}]}
+
+
+def jwt(claims):
+    """Access token Keycloak для тестов: подпись не нужна, кабинет только читает роли."""
+    import base64
+    import json
+    body = base64.urlsafe_b64encode(json.dumps(claims).encode()).decode().rstrip("=")
+    return "e30." + body + ".sig"
+
+
+class SamePersonTestCase(TestCase):
+
+    def test_names(self):
+        from cabinet.schedule import same_person
+        full = "Байымова Жылдыз Асановна"
+        self.assertTrue(same_person("Байымова Ж.", full))
+        self.assertTrue(same_person("Байымова Ж. А.", full))
+        self.assertTrue(same_person("байымова жылдыз", full))
+        self.assertTrue(same_person("Сёмина Анна", "Семина Анна Петровна"))      # ё = е
+        self.assertFalse(same_person("Байымова А.", full))
+        self.assertFalse(same_person("Байымова", full))                         # одной фамилии мало
+        self.assertFalse(same_person("IT отдел", full))
+        self.assertFalse(same_person("Аббас Кхан", "Кхан Аббас"))               # порядок другой — свяжет ИО
+
+
+@override_settings(OIDC=OIDC, GAUDI_API_URL="http://gaudi.test", GAUDI_API_KEY="k.k",
+                   SCHEDULE_API_URL="https://schedule.test", SCHEDULE_API_KEY="s.k")
+class TeacherScheduleTestCase(TestCase):
+    """Пары преподавателя: связь с расписанием по ФИО или вручную через ИО."""
+
+    def setUp(self):
+        from django.core.cache import cache
+        cache.clear()
+        self.profile, self.calls = STAFF_PROFILE, []
+        patcher = mock.patch("requests.get", side_effect=self.answers)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        self.login(roles=[])
+
+    def login(self, roles):
+        staff_oidc = dict(OIDC, staff={"issuer": "https://auth.test/realms/staff", "client_id": "cabinet",
+                                       "client_secret": "s"})
+        tok = dict(token("777"), access_token=jwt({"realm_access": {"roles": roles}}))
+        with self.settings(OIDC=staff_oidc), mock.patch("cabinet.oidc.client", return_value=FakeClient(tok)):
+            self.client.get("/auth/staff/callback/")
+
+    def answers(self, url, params=None, **kwargs):
+        self.calls.append((url, params))
+        if url.endswith("/exam-sheets/"):
+            return fake_response(200, {"sheets": []})
+        if "/api/cabinet/staff/" in url:
+            return fake_response(200, self.profile)
+        if url.endswith("/lectors/"):
+            return fake_response(200, LECTORS)
+        return fake_response(200, LECTOR_LESSONS if params.get("lector") == 4 else {"lessons": []})
+
+    def test_found_by_name(self):
+        from cabinet.models import LectorLink
+        self.assertEqual(self.client.session["who"]["roles"], [])
+        with mock.patch("cabinet.views.timezone.localtime",
+                        return_value=timezone_at("2026-10-28T09:00")):
+            page = self.client.get("/").content.decode()
+        self.assertIn("Педагогика", page)
+        self.assertIn("ПСИ-1-25", page)                         # преподавателю — группа, а не он сам
+        link = LectorLink.objects.get()
+        self.assertEqual((link.lector_id, link.staff_id, link.auto), (4, 777, True))
+        self.assertNotIn("/io/lectors/", page)                  # вкладка ИО — только с ролью io
+
+    def test_not_found(self):
+        self.profile = dict(STAFF_PROFILE, holder=dict(STAFF_PROFILE["holder"], full_name="Кхан Аббас"))
+        page = self.client.get("/schedule/").content.decode()
+        self.assertIn("Вас пока не нашли в расписании", page)
+
+    def test_io_links_by_hand(self):
+        from cabinet.models import LectorLink
+        self.assertEqual(self.client.get("/io/lectors/").status_code, 404)
+        self.login(roles=["io", "default-roles-staff"])
+        page = self.client.get("/io/lectors/").content.decode()
+        self.assertIn("Аббас Кхан", page)
+        self.assertIn('href="/io/lectors/"', page)
+        self.client.post("/io/lectors/", {"lector": "11", "staff": "777"})
+        link = LectorLink.objects.get(lector_id=11)
+        self.assertEqual((link.staff_id, link.staff_name, link.auto), (777, "Абдыкадырова Мая Байсаловна", False))
+        self.assertIn("«Аббас Кхан» — это Абдыкадырова Мая Байсаловна.", self.client.get("/io/lectors/").content.decode())
+        self.client.post("/io/lectors/", {"lector": "11", "staff": ""})
+        self.assertFalse(LectorLink.objects.filter(lector_id=11).exists())
+        self.assertEqual(self.client.post("/io/lectors/", {"lector": "999", "staff": "1"}).status_code, 404)
+
+
+def timezone_at(text):
+    """Момент по Бишкеку для подмены «сейчас»."""
+    import datetime as dt
+    from zoneinfo import ZoneInfo
+    return dt.datetime.fromisoformat(text).replace(tzinfo=ZoneInfo("Asia/Bishkek"))

@@ -21,6 +21,7 @@ from django.utils.translation import get_language, gettext as _
 from django.views.decorators.http import require_POST
 
 from . import gaudi, oidc, schedule
+from .models import LectorLink
 
 PROFILE_SECONDS = 300  # профиль меняется редко; после выхода и нового входа берётся заново
 
@@ -73,7 +74,8 @@ def login_callback(request, kind):
         # логин в Keycloak должен быть ID в Гауди — иначе непонятно, чьи данные показывать
         return login_page(request, _("Логин %(login)s не похож на ID в Гауди. Обратитесь в ИО.") % {"login": login})
     request.session.flush()  # новая пустая сессия после входа: ничего от прежнего пользователя
-    request.session["who"] = {"kind": kind, "id": int(login), "name": info.get("name") or login}
+    request.session["who"] = {"kind": kind, "id": int(login), "name": info.get("name") or login,
+                              "roles": oidc.realm_roles(token)}
     request.session["id_token"] = token.get("id_token", "")
     return redirect("home")
 
@@ -145,13 +147,31 @@ def _profile_and_lessons(request):
     except gaudi.GaudiError as exc:
         context["errors"].append(str(exc))
         return context
-    group = context["profile"]["holder"].get("group")
-    if who["kind"] == "student" and group:
-        try:
-            context["lessons"] = schedule.group_lessons(group)
-        except schedule.ScheduleError as exc:
-            context["errors"].append(str(exc))
+    holder = context["profile"]["holder"]
+    try:
+        if who["kind"] == "student" and holder.get("group"):
+            context["lessons"] = schedule.group_lessons(holder["group"])
+        elif who["kind"] == "staff":
+            lector_ids = _lector_ids(who, holder["full_name"])
+            context["lessons"] = schedule.lector_lessons(lector_ids) if lector_ids else None
+    except schedule.ScheduleError as exc:
+        context["errors"].append(str(exc))
     return context
+
+
+def _lector_ids(who, full_name):
+    """Записи расписания этого преподавателя. Нет связи — ищем по ФИО: ровно одно совпадение, ещё ни с кем
+    не связанное, — запоминаем; иначе пусто (свяжет ИО)."""
+    ids = list(LectorLink.objects.filter(staff_id=who["id"]).values_list("lector_id", flat=True))
+    if ids:
+        return ids
+    found = [x for x in schedule.lectors() if schedule.same_person(x["name"], full_name)]
+    if len(found) == 1:
+        link, _created = LectorLink.objects.get_or_create(lector_id=found[0]["id"], defaults={
+            "lector_name": found[0]["name"], "staff_id": who["id"], "staff_name": full_name, "auto": True})
+        if link.staff_id == who["id"]:
+            return [link.lector_id]
+    return []
 
 
 @login_required
@@ -253,3 +273,51 @@ def grade_sheet(request, sheet_id):
         _flash(request, exc, ok=False)
     _forget(request, "sheets")
     return redirect("sheets")
+
+
+IO_ROLE = "io"  # роль realm сотрудников: сотрудник информационного отдела
+
+
+def io_required(view):
+    @wraps(view)
+    def wrapper(request, *args, **kwargs):
+        who = request.session.get("who") or {}
+        if who.get("kind") != "staff" or IO_ROLE not in who.get("roles", []):
+            raise Http404
+        return view(request, *args, **kwargs)
+    return login_required(wrapper)
+
+
+@io_required
+def io_lectors(request):
+    """ИО: преподаватели расписания ↔ сотрудники Гауди. Кого кабинет не нашёл по ФИО — связать вручную."""
+    if request.method == "POST":
+        lector_id = int(request.POST.get("lector") or 0)
+        lector = next((x for x in schedule.lectors() if x["id"] == lector_id), None)
+        if lector is None:
+            raise Http404
+        staff_id = request.POST.get("staff", "").strip()
+        if not staff_id:
+            LectorLink.objects.filter(lector_id=lector_id).delete()
+            _flash(request, _("Связь для «%(name)s» снята.") % {"name": lector["name"]})
+        elif not staff_id.isdigit():
+            _flash(request, _("ID сотрудника — только цифры."), ok=False)
+        else:
+            try:
+                holder = gaudi.profile("staff", int(staff_id))["holder"]
+            except gaudi.GaudiError:
+                _flash(request, _("Сотрудника с ID %(id)s нет в Гауди.") % {"id": staff_id}, ok=False)
+            else:
+                LectorLink.objects.update_or_create(lector_id=lector_id, defaults={
+                    "lector_name": lector["name"], "staff_id": int(staff_id), "staff_name": holder["full_name"],
+                    "auto": False, "linked_by": request.session["who"]["name"]})
+                _flash(request, _("«%(lector)s» — это %(staff)s.") % {"lector": lector["name"], "staff": holder["full_name"]})
+        return redirect("io-lectors")
+    context = {"errors": [], "rows": []}
+    try:
+        links = {x.lector_id: x for x in LectorLink.objects.all()}
+        context["rows"] = [{"lector": x, "link": links.get(x["id"])} for x in schedule.lectors()]
+        context["rows"].sort(key=lambda r: (r["link"] is not None, r["lector"]["name"]))  # несвязанные сверху
+    except schedule.ScheduleError as exc:
+        context["errors"].append(str(exc))
+    return render(request, "cabinet/io_lectors.html", context)

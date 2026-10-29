@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-29 15:49+0600\n"
+"POT-Creation-Date: 2026-10-29 16:23+0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -42,44 +42,63 @@ msgstr "Гауди %(code)s катасы менен жооп берди."
 msgid "Связь с расписанием не настроена."
 msgstr "Гауди менен байланыш жөндөлгөн эмес."
 
-#: cabinet/schedule.py:36
+#: cabinet/schedule.py:33
 msgid "Расписание сейчас не отвечает. Попробуйте позже."
 msgstr "Гауди азыр жооп бербей жатат. Кийинчерээк аракет кылыңыз."
 
-#: cabinet/schedule.py:40
+#: cabinet/schedule.py:37
 #, python-format
 msgid "Расписание ответило ошибкой %(code)s."
 msgstr "Гауди %(code)s катасы менен жооп берди."
 
-#: cabinet/views.py:69
+#: cabinet/views.py:70
 msgid "Вход не завершён. Попробуйте ещё раз."
 msgstr "Кирүү аяктаган жок. Кайра аракет кылыңыз."
 
-#: cabinet/views.py:74
+#: cabinet/views.py:75
 #, python-format
 msgid "Логин %(login)s не похож на ID в Гауди. Обратитесь в ИО."
 msgstr ""
 "%(login)s логини Гаудидеги ID'ге окшобойт. Маалымат бөлүмүнө кайрылыңыз."
 "%(login)s логини Гаудидеги ID'ге окшобойт. Маалымат бөлүмүнө кайрылыңыз."
 
-#: cabinet/views.py:217
+#: cabinet/views.py:236
 msgid "Запрос отправлен в учебный отдел. Лист выдадут после оплаты пересдачи."
 msgstr ""
 "Сурам окуу бөлүмүнө жөнөтүлдү. Кайра тапшыруу төлөнгөндөн кийин барак "
 "берилет."
 
-#: cabinet/views.py:219
+#: cabinet/views.py:238
 msgid "Не та строка."
 msgstr "Туура эмес сап."
 
-#: cabinet/views.py:247
+#: cabinet/views.py:266
 msgid "Баллы — целые числа."
 msgstr "Баллдар — бүтүн сандар."
 
-#: cabinet/views.py:251
+#: cabinet/views.py:270
 #, python-format
 msgid "Баллы по листу №%(n)s записаны в Гауди."
 msgstr "№%(n)s барак боюнча баллдар Гаудиге жазылды."
+
+#: cabinet/views.py:301
+#, python-format
+msgid "Связь для «%(name)s» снята."
+msgstr "«%(name)s» үчүн байланыш алынды."
+
+#: cabinet/views.py:303
+msgid "ID сотрудника — только цифры."
+msgstr "Кызматкердин ID — сандар гана."
+
+#: cabinet/views.py:308
+#, python-format
+msgid "Сотрудника с ID %(id)s нет в Гауди."
+msgstr "ID %(id)s кызматкер Гаудиде жок."
+
+#: cabinet/views.py:313
+#, python-format
+msgid "«%(lector)s» — это %(staff)s."
+msgstr "«%(lector)s» — бул %(staff)s."
 
 #: config/settings.py:76
 msgid "Русский"
@@ -106,7 +125,7 @@ msgid "Разделы"
 msgstr "Бөлүмдөр"
 
 #: templates/base.html:26 templates/cabinet/home.html:3
-#: templates/cabinet/home.html:34
+#: templates/cabinet/home.html:33
 msgid "Сегодня"
 msgstr "Бүгүн"
 
@@ -123,6 +142,10 @@ msgstr "Окуу"
 #: templates/base.html:31
 msgid "Экз. листы"
 msgstr "Экз. барактар"
+
+#: templates/base.html:32
+msgid "ИО"
+msgstr "ИБ"
 
 #: templates/cabinet/_lesson.html:5
 msgid "Сейчас"
@@ -217,21 +240,51 @@ msgstr "Баллыңызды күтүп жатат: %(n)s."
 msgid "Открыть"
 msgstr "Ачуу"
 
-#: templates/cabinet/home.html:38
+#: templates/cabinet/home.html:37
 msgid "Сегодня пар нет."
 msgstr "Бүгүн сабак жок."
 
-#: templates/cabinet/home.html:40
+#: templates/cabinet/home.html:39 templates/cabinet/week.html:18
+msgid ""
+"Вас пока не нашли в расписании по ФИО. Информационный отдел свяжет вас с "
+"расписанием — тогда здесь появятся ваши пары."
+msgstr ""
+"Расписаниеде сизди аты-жөнүңүз боюнча таба алган жокпуз. Маалымат бөлүмү "
+"сизди расписание менен байланыштырат — анда сабактарыңыз ушул жерде көрүнөт."
+
+#: templates/cabinet/home.html:41
 msgid "Расписание на неделю"
 msgstr "Жумалык сабак жадыбалы"
 
-#: templates/cabinet/home.html:43 templates/cabinet/week.html:18
+#: templates/cabinet/io_lectors.html:3 templates/cabinet/io_lectors.html:6
+msgid "Преподаватели в расписании"
+msgstr "Расписаниедеги окутуучулар"
+
+#: templates/cabinet/io_lectors.html:7
 msgid ""
-"Ваши пары из расписания появятся здесь, когда учебный отдел сопоставит "
-"преподавателей с расписанием."
+"Кабинет связывает преподавателя с расписанием сам — по ФИО при первом входе. "
+"Кого не нашёл, свяжите здесь: ID сотрудника в Гауди. Пустое поле — снять "
+"связь."
 msgstr ""
-"Учебный бөлүм окутуучуларды расписание менен дал келтиргенден кийин, "
-"сабактарыңыз ушул жерде көрүнөт."
+"Кабинет окутуучуну расписание менен өзү байланыштырат — биринчи киргенде аты-"
+"жөнү боюнча. Табылбагандарды бул жерде байланыштырыңыз: Гаудидеги "
+"кызматкердин ID. Бош талаа — байланышты алуу."
+
+#: templates/cabinet/io_lectors.html:13
+msgid "по ФИО"
+msgstr "аты-жөнү боюнча"
+
+#: templates/cabinet/io_lectors.html:14
+msgid "не связан"
+msgstr "байланышпаган"
+
+#: templates/cabinet/io_lectors.html:18
+msgid "ID в Гауди"
+msgstr "Гаудидеги ID"
+
+#: templates/cabinet/io_lectors.html:19
+msgid "Сохранить"
+msgstr "Сактоо"
 
 #: templates/cabinet/login.html:3
 msgid "Вход"

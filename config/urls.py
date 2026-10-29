@@ -9,6 +9,7 @@ urlpatterns = [
     path("study/sheet/", views.request_sheet, name="request-sheet"),
     path("sheets/", views.sheets, name="sheets"),
     path("sheets/<int:sheet_id>/", views.grade_sheet, name="grade-sheet"),
+    path("io/lectors/", views.io_lectors, name="io-lectors"),
     path("login/", views.login_page, name="login"),
     path("login/<str:kind>/", views.login_start, name="login-start"),
     path("auth/<str:kind>/callback/", views.login_callback, name="login-callback"),

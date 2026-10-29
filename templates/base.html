@@ -29,6 +29,7 @@
   <a href="{% url 'study' %}"{% if name == 'study' %} class="on" aria-current="page"{% endif %}>{% translate "Учёба" %}</a>
   {% else %}
   <a href="{% url 'sheets' %}"{% if name == 'sheets' %} class="on" aria-current="page"{% endif %}>{% translate "Экз. листы" %}{% if sheets_waiting %} <span class="badge">{{ sheets_waiting }}</span>{% endif %}</a>
+  {% if "io" in who.roles %}<a href="{% url 'io-lectors' %}"{% if name == 'io-lectors' %} class="on" aria-current="page"{% endif %}>{% translate "ИО" %}</a>{% endif %}
   {% endif %}
   {% endwith %}
 </div></nav>

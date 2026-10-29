@@ -4,7 +4,7 @@
   <div class="what">
     {% if lesson.state == "now" %}<span class="tag now">{% translate "Сейчас" %}</span>{% elif lesson.state == "next" %}<span class="tag next">{% translate "Следующая" %}</span>{% endif %}
     <b>{{ lesson.discipline }}</b>
-    <span class="muted">{{ lesson.lesson_type }} · {{ lesson.lector.name }}</span>
+    <span class="muted">{{ lesson.lesson_type }} · {% if who.kind == "staff" %}{{ lesson.group.title }}{% else %}{{ lesson.lector.name }}{% endif %}</span>
     <span class="muted">{% if lesson.classroom %}{% translate "ауд." %} {{ lesson.classroom }}{% endif %}{% if lesson.campus %}{% if lesson.classroom %} · {% endif %}{% if lesson.campus|length == 1 %}{% blocktranslate with n=lesson.campus %}корпус {{ n }}{% endblocktranslate %}{% else %}{{ lesson.campus }}{% endif %}{% endif %}</span>
     {% if lesson.link %}<a href="{{ lesson.link }}" target="_blank" rel="noopener">{% translate "Ссылка на занятие" %}</a>{% endif %}
     {% if lesson.notes %}<span class="muted">{{ lesson.notes }}</span>{% endif %}

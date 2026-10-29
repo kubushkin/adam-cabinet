@@ -4,6 +4,9 @@
 Два realm: студенты и преподаватели (ID студентов и сотрудников в Гауди пересекаются,
 поэтому в одном realm их логины столкнулись бы). Подпись токена и nonce проверяет authlib.
 """
+import base64
+import json
+
 from authlib.integrations.django_client import OAuth
 from django.conf import settings
 
@@ -28,3 +31,17 @@ def client(kind):
             client_kwargs={"scope": "openid profile"},
         )
     return found
+
+
+def realm_roles(token):
+    """Роли realm (ППС, ИО, куратор…) из access token Keycloak: realm_access.roles.
+
+    Токен кабинет получил сам, напрямую от Keycloak по HTTPS (обмен кода), поэтому подпись здесь
+    не перепроверяем — только читаем содержимое. Не похоже на JWT — ролей нет.
+    """
+    try:
+        payload = str(token.get("access_token", "")).split(".")[1]
+        data = json.loads(base64.urlsafe_b64decode(payload + "=" * (-len(payload) % 4)))
+        return sorted(str(r) for r in data.get("realm_access", {}).get("roles", []))
+    except (IndexError, ValueError, AttributeError):
+        return []
