@@ -249,6 +249,7 @@ def sheets(request):
         raise Http404
     context = {"errors": [], "sheets": []}
     try:
+        _forget(request, "sheets")  # вкладку открывают, чтобы увидеть новые листы — всегда свежий список
         context["sheets"] = _with_dates(_saved(request, "sheets", lambda: gaudi.exam_sheets("staff", who["id"])))
     except gaudi.GaudiError as exc:
         context["errors"].append(str(exc))

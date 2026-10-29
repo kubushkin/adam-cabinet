@@ -347,6 +347,11 @@ class TeacherSheetsTestCase(TestCase):
         self.assertIn('<span class="badge">1</span>', page)
         self.assertIn('name="first_module" min="0" max="100" required value="25"', page)
 
+    def test_tab_is_always_fresh(self):
+        self.client.get("/sheets/")
+        self.client.get("/sheets/")
+        self.assertEqual(self.gaudi.count("get", "/exam-sheets/"), 2)   # новый лист виден сразу, без ожидания 5 минут
+
     def test_grade(self):
         self.gaudi.post_answer = (200, {})
         answer = self.client.post("/sheets/5/", {"first_module": "25", "second_module": "30", "exam": "60"})
