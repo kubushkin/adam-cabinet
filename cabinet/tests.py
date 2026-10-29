@@ -133,7 +133,7 @@ class ScheduleTestCase(TestCase):
         cache.clear()
         with mock.patch("cabinet.oidc.client", return_value=FakeClient(token())):
             self.client.get("/auth/student/callback/")
-        self.schedule_calls, self.schedule_status = [], 200
+        self.schedule_calls, self.gaudi_calls, self.schedule_status = [], 0, 200
         patcher = mock.patch("requests.get", side_effect=self.answers)
         patcher.start()
         self.addCleanup(patcher.stop)
@@ -141,6 +141,7 @@ class ScheduleTestCase(TestCase):
     def answers(self, url, **kwargs):
         """Один requests.get на всех: Гауди и расписание различаем по адресу."""
         if "/api/cabinet/" in url:
+            self.gaudi_calls += 1
             return fake_response(200, PROFILE)
         self.schedule_calls.append(kwargs)
         return fake_response(self.schedule_status, LESSONS)
@@ -179,3 +180,16 @@ class ScheduleTestCase(TestCase):
         page = self.client.get("/").content.decode()
         self.assertIn("Асанова Айпери Бакытовна", page)      # профиль на месте
         self.assertIn("Расписание ответило ошибкой 500", page)
+
+    def test_profile_kept_in_session(self):
+        self.client.get("/")
+        self.client.get("/schedule/")
+        self.assertEqual(self.gaudi_calls, 1)                 # вкладки переключаются без запроса в Гауди
+        later = __import__("time").time() + 301
+        with mock.patch("cabinet.views.time.time", return_value=later):
+            self.client.get("/")
+        self.assertEqual(self.gaudi_calls, 2)                 # через 5 минут — свежий профиль
+        with mock.patch("cabinet.oidc.client", return_value=FakeClient(token("20231002"))):
+            self.client.get("/auth/student/callback/")        # вошёл другой человек в том же браузере
+        self.client.get("/")
+        self.assertEqual(self.gaudi_calls, 3)                 # профиль прежнего не показываем

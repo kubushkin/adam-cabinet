@@ -1,9 +1,11 @@
 """
 Вход и выход через Keycloak, главная страница кабинета.
 
-В сессии хранится только «кто вошёл»: {"kind": "student"|"staff", "id": ID в Гауди, "name": …}
-и id_token (нужен Keycloak при выходе). Всё остальное кабинет каждый раз берёт из Гауди.
+В сессии хранится «кто вошёл»: {"kind": "student"|"staff", "id": ID в Гауди, "name": …},
+id_token (нужен Keycloak при выходе) и профиль из Гауди на PROFILE_SECONDS — Гауди отвечает около секунды,
+и без этого чувствовалась задержка при каждом переключении вкладок.
 """
+import time
 from functools import wraps
 from urllib.parse import urlencode
 
@@ -17,6 +19,8 @@ from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from . import gaudi, oidc, schedule
+
+PROFILE_SECONDS = 300  # профиль меняется редко; после выхода и нового входа берётся заново
 
 
 def who_context(request):
@@ -61,6 +65,7 @@ def login_callback(request, kind):
     request.session.cycle_key()  # новая сессия после входа
     request.session["who"] = {"kind": kind, "id": int(login), "name": info.get("name") or login}
     request.session["id_token"] = token.get("id_token", "")
+    request.session.pop("profile", None)  # cycle_key сохраняет данные сессии — чужой профиль не нужен
     return redirect("home")
 
 
@@ -85,12 +90,22 @@ def logout(request):
     return redirect(end + "?" + urlencode(params))
 
 
+def _profile(request, who):
+    """Профиль из Гауди; в сессии держим PROFILE_SECONDS."""
+    saved = request.session.get("profile")
+    if saved and time.time() - saved["at"] < PROFILE_SECONDS:
+        return saved["data"]
+    data = gaudi.profile(who["kind"], who["id"])
+    request.session["profile"] = {"at": time.time(), "data": data}
+    return data
+
+
 def _profile_and_lessons(request):
     """Профиль из Гауди и пары группы студента. Ошибки — текстом, страница всё равно открывается."""
     who = request.session["who"]
     context = {"profile": None, "lessons": None, "errors": []}
     try:
-        context["profile"] = gaudi.profile(who["kind"], who["id"])
+        context["profile"] = _profile(request, who)
     except gaudi.GaudiError as exc:
         context["errors"].append(str(exc))
         return context
