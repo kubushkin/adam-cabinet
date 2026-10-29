@@ -265,8 +265,12 @@ def grade_sheet(request, sheet_id):
     if who["kind"] != "staff":
         raise Http404
     try:
-        scores = {name: int(request.POST.get(name, "")) for name in ("first_module", "second_module", "exam")}
+        # модули могут не прийти (поля закрыты: за модули уже 40+) — тогда их оставит Гауди
+        scores = {name: int(request.POST[name]) if request.POST.get(name, "").strip() else None
+                  for name in ("first_module", "second_module", "exam")}
     except ValueError:
+        scores = {}
+    if scores.get("exam") is None:
         _flash(request, _("Баллы — целые числа."), ok=False)
         return redirect("sheets")
     try:

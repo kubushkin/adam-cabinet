@@ -21,12 +21,15 @@
   </dl>
   {% if sheet.status == "approved" %}
   <form class="grade" method="post" action="{% url 'grade-sheet' sheet.id %}">{% csrf_token %}
-    <label>{% translate "I модуль" %}<input type="number" name="first_module" min="0" max="100" required value="{{ sheet.current.first_module }}"></label>
-    <label>{% translate "II модуль" %}<input type="number" name="second_module" min="0" max="100" required value="{{ sheet.current.second_module }}"></label>
+    {% with locked=sheet.modules_locked top=sheet.modules_max|default:40 %}
+    <label>{% translate "I модуль" %}<input type="number" name="first_module" min="{{ sheet.current.first_module }}" max="{{ top }}" required value="{{ sheet.current.first_module }}"{% if locked %} disabled{% endif %}></label>
+    <label>{% translate "II модуль" %}<input type="number" name="second_module" min="{{ sheet.current.second_module }}" max="{{ top }}" required value="{{ sheet.current.second_module }}"{% if locked %} disabled{% endif %}></label>
     <label>{% translate "Экзамен" %}<input type="number" name="exam" min="0" max="100" required></label>
     <button type="submit" class="btn primary">{% translate "Записать баллы" %}</button>
   </form>
-  <p class="muted">{% translate "После записи итог и оценку считает Гауди; исправить баллы может только учебный отдел." %}</p>
+  <p class="muted">{% if locked %}{% blocktranslate with n=top %}За два модуля уже {{ n }} баллов или больше — модули остаются как в ведомости, выставьте только экзамен.{% endblocktranslate %}{% else %}{% blocktranslate with n=top %}Модули можно только добавить, вместе — не больше {{ n }} баллов.{% endblocktranslate %}{% endif %}
+    {% translate "После записи итог и оценку считает Гауди; исправить баллы может только учебный отдел." %}</p>
+    {% endwith %}
   {% endif %}
 </section>
 {% empty %}

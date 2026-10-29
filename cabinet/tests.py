@@ -345,7 +345,7 @@ class TeacherSheetsTestCase(TestCase):
         self.assertIn("Лист №5", page)
         self.assertIn("Асанова Айпери Бакытовна · ID 20231001", page)
         self.assertIn('<span class="badge">1</span>', page)
-        self.assertIn('name="first_module" min="0" max="100" required value="25"', page)
+        self.assertIn('name="first_module" min="25" max="40" required value="25"', page)  # только добавить, до 40
 
     def test_tab_is_always_fresh(self):
         self.client.get("/sheets/")
@@ -362,6 +362,17 @@ class TeacherSheetsTestCase(TestCase):
         self.assertEqual(url, "http://gaudi.test/api/cabinet/staff/777/exam-sheets/5/")
         self.assertEqual(kwargs["json"], {"first_module": 25, "second_module": 30, "exam": 60})
         self.assertIn("Баллы по листу №5 записаны в Гауди.", self.client.get("/sheets/").content.decode())
+
+    def test_modules_locked(self):
+        self.gaudi.sheets[0]["current"].update(first_module=36, second_module=35)
+        self.gaudi.sheets[0].update(modules_locked=True, modules_max=40)
+        page = self.client.get("/sheets/").content.decode()
+        self.assertIn('value="36" disabled', page)
+        self.assertIn("выставьте только экзамен", page)
+        self.gaudi.post_answer = (200, {})
+        self.client.post("/sheets/5/", {"exam": "60"})                    # закрытые поля браузер не отправляет
+        post = [k for m, u, k in self.gaudi.calls if m == "post"][0]
+        self.assertEqual(post["json"], {"first_module": None, "second_module": None, "exam": 60})
 
     def test_grade_refused(self):
         self.gaudi.post_answer = (400, {"detail": "Срок листа истёк. Студенту нужно запросить новый."})

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-29 16:23+0600\n"
+"POT-Creation-Date: 2026-10-29 17:16+0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -62,40 +62,40 @@ msgstr ""
 "%(login)s логини Гаудидеги ID'ге окшобойт. Маалымат бөлүмүнө кайрылыңыз."
 "%(login)s логини Гаудидеги ID'ге окшобойт. Маалымат бөлүмүнө кайрылыңыз."
 
-#: cabinet/views.py:236
+#: cabinet/views.py:238
 msgid "Запрос отправлен в учебный отдел. Лист выдадут после оплаты пересдачи."
 msgstr ""
 "Сурам окуу бөлүмүнө жөнөтүлдү. Кайра тапшыруу төлөнгөндөн кийин барак "
 "берилет."
 
-#: cabinet/views.py:238
+#: cabinet/views.py:240
 msgid "Не та строка."
 msgstr "Туура эмес сап."
 
-#: cabinet/views.py:266
+#: cabinet/views.py:274
 msgid "Баллы — целые числа."
 msgstr "Баллдар — бүтүн сандар."
 
-#: cabinet/views.py:270
+#: cabinet/views.py:278
 #, python-format
 msgid "Баллы по листу №%(n)s записаны в Гауди."
 msgstr "№%(n)s барак боюнча баллдар Гаудиге жазылды."
 
-#: cabinet/views.py:301
+#: cabinet/views.py:309
 #, python-format
 msgid "Связь для «%(name)s» снята."
 msgstr "«%(name)s» үчүн байланыш алынды."
 
-#: cabinet/views.py:303
+#: cabinet/views.py:311
 msgid "ID сотрудника — только цифры."
 msgstr "Кызматкердин ID — сандар гана."
 
-#: cabinet/views.py:308
+#: cabinet/views.py:316
 #, python-format
 msgid "Сотрудника с ID %(id)s нет в Гауди."
 msgstr "ID %(id)s кызматкер Гаудиде жок."
 
-#: cabinet/views.py:313
+#: cabinet/views.py:321
 #, python-format
 msgid "«%(lector)s» — это %(staff)s."
 msgstr "«%(lector)s» — бул %(staff)s."
@@ -376,23 +376,37 @@ msgstr "жыйынтык"
 msgid "По листу"
 msgstr "Барак боюнча"
 
-#: templates/cabinet/sheets.html:24
+#: templates/cabinet/sheets.html:25
 msgid "I модуль"
 msgstr "I модуль"
 
-#: templates/cabinet/sheets.html:25
+#: templates/cabinet/sheets.html:26
 msgid "II модуль"
 msgstr "II модуль"
 
-#: templates/cabinet/sheets.html:26
+#: templates/cabinet/sheets.html:27
 msgid "Экзамен"
 msgstr "Экзамен"
 
-#: templates/cabinet/sheets.html:27
+#: templates/cabinet/sheets.html:28
 msgid "Записать баллы"
 msgstr "Баллдарды жазуу"
 
-#: templates/cabinet/sheets.html:29
+#: templates/cabinet/sheets.html:30
+#, python-format
+msgid ""
+"За два модуля уже %(n)s баллов или больше — модули остаются как в ведомости, "
+"выставьте только экзамен."
+msgstr ""
+"Эки модуль үчүн %(n)s балл же андан көп — модулдар ведомостогудай калат, "
+"экзаменди гана коюңуз."
+
+#: templates/cabinet/sheets.html:30
+#, python-format
+msgid "Модули можно только добавить, вместе — не больше %(n)s баллов."
+msgstr "Модулдарга балл кошууга гана болот, экөө чогуу — %(n)s баллдан ашпайт."
+
+#: templates/cabinet/sheets.html:31
 msgid ""
 "После записи итог и оценку считает Гауди; исправить баллы может только "
 "учебный отдел."
@@ -400,7 +414,7 @@ msgstr ""
 "Жазгандан кийин жыйынтыкты жана баалоону Гауди эсептейт; баллдарды окуу "
 "бөлүмү гана оңдой алат."
 
-#: templates/cabinet/sheets.html:33
+#: templates/cabinet/sheets.html:36
 msgid ""
 "Экзаменационных листов на вас нет. Когда учебный отдел назначит вас "
 "экзаменатором, лист появится здесь."
