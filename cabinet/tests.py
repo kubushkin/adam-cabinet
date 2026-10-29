@@ -55,6 +55,7 @@ class LoginTestCase(TestCase):
         page = self.client.get("/login/").content.decode()
         self.assertIn("/login/student/", page)
         self.assertNotIn("/login/staff/", page)  # realm преподавателей не настроен — кнопки нет
+        self.assertNotIn("swipe.js", page)       # до входа вкладок нет — и свайпа тоже
         self.assertEqual(self.client.get("/login/staff/").status_code, 404)
         self.assertRedirects(self.client.get("/"), "/login/", fetch_redirect_response=False)
 
@@ -345,6 +346,7 @@ class TeacherSheetsTestCase(TestCase):
         self.assertIn("Лист №5", page)
         self.assertIn("Асанова Айпери Бакытовна · ID 20231001", page)
         self.assertIn('<span class="badge">1</span>', page)
+        self.assertIn("swipe.js", page)                        # свайп между вкладками — только после входа
         self.assertIn('name="first_module" min="25" max="40" required value="25"', page)  # только добавить, до 40
 
     def test_tab_is_always_fresh(self):

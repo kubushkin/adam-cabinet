@@ -89,3 +89,8 @@ nav.tabs a.on { color: var(--ink); border-bottom-color: var(--navy); }
 .links form { display: flex; gap: 6px; margin: 0; }
 .links input { font: inherit; width: 120px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; }
 .btn.small.plain { border-color: var(--line); color: var(--ink); }
+/* свайп между вкладками: страница уезжает в сторону, пока грузится соседняя */
+main { transition: transform .18s ease-out, opacity .18s ease-out; }
+main.leave-left { transform: translateX(-24px); opacity: .4; }
+main.leave-right { transform: translateX(24px); opacity: .4; }
+@media (prefers-reduced-motion: reduce) { main { transition: none; } }
